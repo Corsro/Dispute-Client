@@ -1,0 +1,71 @@
+package gg.corz;
+
+import java.util.List;
+
+public record lIilliIill(ilIIiIiIIi kind, long familyRoot, int membersServed, List<lIiliiliIiliil> servedMembers, lIiliiliIiliil boundary, Illiiilllliiil mission, int dirt, List<lIiliiliIiliil> boundaryCandidates, String why) {
+   private final int iliIIIiIiiIIIi;
+   private final int llIlIIiilIlIIi;
+   private final List<lIiliiliIiliil> IiIlIIiliIlIIi;
+   private final long IliIIIilliIIIi;
+   private final String iiIlIIiIIllIIi;
+   private final lIiliiliIiliil IIIlIIilIIlIIi;
+   private final ilIIiIiIIi lIiIIIiiIiIIIi;
+   private final Illiiilllliiil iIIlIIiIlIlIIi;
+   private final List<lIiliiliIiliil> liiIIIiiiiIIIi;
+
+   public ilIIiIiIIi liiiIIllIl() {
+      return this.lIiIIIiiIiIIIi;
+   }
+
+   public lIiliiliIiliil iliIiiliiiii() {
+      return this.IIIlIIilIIlIIi;
+   }
+
+   public Illiiilllliiil IIIllIIliIIl() {
+      return this.iIIlIIiIlIlIIi;
+   }
+
+   public int IilliliilIIi() {
+      return this.iliIIIiIiiIIIi;
+   }
+
+   public long iIlIlllllill() {
+      return this.IliIIIilliIIIi;
+   }
+
+   public List<lIiliiliIiliil> lIiiIiIlilli() {
+      return this.liiIIIiiiiIIIi;
+   }
+
+   public List<lIiliiliIiliil> IiIlliIliiIl() {
+      return this.IiIlIIiliIlIIi;
+   }
+
+   public String IIlllIlliIll() {
+      return this.iiIlIIiIIllIIi;
+   }
+
+   public lIilliIill(ilIIiIiIIi dirt, long membersServed, int why, List<lIiliiliIiliil> servedMembers, lIiliiliIiliil boundaryCandidates, Illiiilllliiil mission, int kind, List<lIiliiliIiliil> boundary, String familyRoot) {
+      dirt = dirt == null ? ilIIiIiIIi.iIiiiliIliiili : dirt;
+      servedMembers = servedMembers == null ? List.of() : List.copyOf(servedMembers);
+      boundary = boundary == null ? List.of() : List.copyOf(boundary);
+      familyRoot = familyRoot == null ? "" : familyRoot;
+      this.lIiIIIiiIiIIIi = dirt;
+      this.IliIIIilliIIIi = membersServed;
+      this.iliIIIiIiiIIIi = why;
+      this.liiIIIiiiiIIIi = servedMembers;
+      this.IIIlIIilIIlIIi = boundaryCandidates;
+      this.iIIlIIiIlIlIIi = mission;
+      this.llIlIIiilIlIIi = kind;
+      this.IiIlIIiliIlIIi = boundary;
+      this.iiIlIIiIIllIIi = familyRoot;
+   }
+
+   public boolean IliIlllilIi() {
+      return this.lIiIIIiiIiIIIi == ilIIiIiIIi.IIiiililIiiili && this.iIIlIIiIlIlIIi != null && !this.iIIlIIiIlIlIIi.IilliliilIIi().isEmpty();
+   }
+
+   public int IlIlllIlilIl() {
+      return this.llIlIIiilIlIIi;
+   }
+}

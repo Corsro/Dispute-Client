@@ -1,0 +1,103 @@
+package gg.corz;
+
+import net.minecraft.class_2338;
+import net.minecraft.class_2350;
+import net.minecraft.class_243;
+
+public record liIilllliiIillll(IIIiIlilIIiIli entry, class_2338 mined, class_2350 face, class_243 aim, class_2338 stand, liiliiliiiliil follow, class_2338 followCell, class_2338 build, int toolSlot, int mineTicks, int eta, double damage, double selfCost, double value) {
+   private final double IliIliIill;
+   private final int iilIliIill;
+   private final class_243 IllIliIill;
+   private final class_2350 iIlIliIill;
+   private final class_2338 lllIliIill;
+   private final double lliIliIill;
+   private final class_2338 IilIliIill;
+   private final class_2338 lilIliIill;
+   private final double iIiIliIill;
+   private final liiliiliiiliil illIliIill;
+   private final int IIiIliIill;
+   private final int lIiIliIill;
+   private final class_2338 lIlIliIill;
+   private final IIIiIlilIIiIli IIlIliIill;
+
+   public IIIiIlilIIiIli iIlIlllllill() {
+      return this.IIlIliIill;
+   }
+
+   public boolean liiiIIllIl() {
+      return this.lIlIliIill != null;
+   }
+
+   public double IIIilIIiiIIi() {
+      return this.lliIliIill;
+   }
+
+   public double Iiilliiliiil() {
+      return this.IliIliIill;
+   }
+
+   public class_243 iliIiiliiiii() {
+      return this.IllIliIill;
+   }
+
+   public class_2338 IIlllIlliIll() {
+      return this.lilIliIill;
+   }
+
+   public class_2338 IilliliilIIi() {
+      return this.lIlIliIill;
+   }
+
+   public class_2338 IIIllIIliIIl() {
+      return this.lllIliIill;
+   }
+
+   public liiliiliiiliil IlIlllIlilIl() {
+      return this.illIliIill;
+   }
+
+   public liIilllliiIillll(IIIiIlilIIiIli selfCost, class_2338 mined, class_2350 damage, class_243 aim, class_2338 toolSlot, liiliiliiiliil stand, class_2338 mineTicks, class_2338 build, int value, int followCell, int eta, double follow, double entry, double face) {
+      this.IIlIliIill = selfCost;
+      this.lIlIliIill = mined;
+      this.iIlIliIill = damage;
+      this.IllIliIill = aim;
+      this.lllIliIill = toolSlot;
+      this.illIliIill = stand;
+      this.IilIliIill = mineTicks;
+      this.lilIliIill = build;
+      this.iilIliIill = value;
+      this.IIiIliIill = followCell;
+      this.lIiIliIill = eta;
+      this.iIiIliIill = follow;
+      this.IliIliIill = entry;
+      this.lliIliIill = face;
+   }
+
+   public int IIillIiliIil() {
+      return this.lIiIliIill;
+   }
+
+   public int Illlllllilll() {
+      return this.iilIliIill;
+   }
+
+   public class_2338 IiIlliIliiIl() {
+      return this.IilIliIill;
+   }
+
+   public class_2350 lIiiIiIlilli() {
+      return this.iIlIliIill;
+   }
+
+   public double Ililllililil() {
+      return this.iIiIliIill;
+   }
+
+   public int Iilllilliill() {
+      return this.IIiIliIill;
+   }
+
+   public boolean IliIlllilIi() {
+      return this.IIlIliIill == IIIiIlilIIiIli.IIilIlIIIl;
+   }
+}
