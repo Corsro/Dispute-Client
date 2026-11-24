@@ -1,5 +1,7 @@
 package com.corz.client;
 
+import com.corz.client.android.AndroidRuntimeEnv;
+import com.corz.client.android.MojoInputBridge;
 import gg.corz.IIIIIllllIIIIlll;
 import gg.corz.IIIiiiIllIIiiiIl;
 import gg.corz.IIIiillllIIiilll;
@@ -75,13 +77,13 @@ public class CorzClient implements ClientModInitializer {
       return false;
    }
 
-   private static boolean bindDown(class_1041 code, int window) {
-      if (window < 0) {
+   private static boolean bindDown(class_1041 window, int code) {
+      if (code < 0) {
          return false;
-      } else if (IlIiliIlllIiliIl.IliIlllilIi(window)) {
-         return GLFW.glfwGetMouseButton(code.method_4490(), IlIiliIlllIiliIl.liiiIIllIl(window)) == 1;
+      } else if (IlIiliIlllIiliIl.IliIlllilIi(code)) {
+         return MojoInputBridge.isMouseButtonDown(window, IlIiliIlllIiliIl.liiiIIllIl(code));
       } else {
-         return class_3675.method_15987(code, window);
+         return MojoInputBridge.isKeyDown(window, code);
       }
    }
 
@@ -115,6 +117,7 @@ public class CorzClient implements ClientModInitializer {
    }
 
    public void onInitializeClient() {
+      AndroidRuntimeEnv.ensureAndroidHeadlessAwtIfNeeded();
       iiIliiIIllii.iIlIlllllill();
       IIIIIllllIIIIlll.liiiIIllIl();
       lIiilIIliIiilIIl.iIlIlllllill();
@@ -174,7 +177,7 @@ public class CorzClient implements ClientModInitializer {
                   class_1041 var3 = client.method_22683();
                   var8 ^= ((long)bindDown(var3, (int)(var8 >>> 32)) ^ var8) & -1L >>> 32;
                   if ((int)var8 != 0 && !guiKeyWasPressed) {
-                     var10 ^= ((long)(!class_3675.method_15987(var3, 341) && !class_3675.method_15987(var3, 345) ? 0 : 1) << 32 ^ var10) & -1L << 32;
+                     var10 ^= ((long)(!MojoInputBridge.isKeyDown(var3, 341) && !MojoInputBridge.isKeyDown(var3, 345) ? 0 : 1) << 32 ^ var10) & -1L << 32;
                      if (IIIIIllllIIIIlll.IiIlliIliiIl()) {
                         client.method_1507(new lillliiliillliil());
                      } else {

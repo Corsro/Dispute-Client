@@ -71,7 +71,8 @@ void main() {
 
     vec4 c;
     if (uMisc.x > 0.5) {
-        c = texelFetch(Sampler0, ivec2(gl_FragCoord.xy), 0);
+        ivec2 texMax = max(textureSize(Sampler0, 0) - ivec2(1), ivec2(0));
+        c = texelFetch(Sampler0, clamp(ivec2(gl_FragCoord.xy), ivec2(0), texMax), 0);
     } else {
         vec2 dx = dFdx(vUv);
         vec2 dy = dFdy(vUv);

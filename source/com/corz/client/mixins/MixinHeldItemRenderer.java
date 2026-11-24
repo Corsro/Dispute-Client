@@ -473,7 +473,7 @@ public abstract class MixinHeldItemRenderer {
                   corz$applyUseTransformsMethod = m;
                }
             }
-         } catch (Exception var5) {
+         } catch (Throwable var5) {
          }
 
       }

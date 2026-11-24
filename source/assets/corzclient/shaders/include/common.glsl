@@ -12,7 +12,7 @@ float ralpha(vec2 size, vec2 coord, vec4 radius, float smoothness) {
     return 1.0 - smoothstep(1.0 - smoothness, 1.0, dist);
 }
 
-const vec2[4] RECT_VERTICES_COORDS = vec2[] (
+const vec2[4] RECT_VERTICES_COORDS = vec2[4] (
     vec2(0.0, 0.0),
     vec2(0.0, 1.0),
     vec2(1.0, 1.0),

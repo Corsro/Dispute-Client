@@ -1,5 +1,6 @@
 package com.corz.client.mixins;
 
+import com.corz.client.android.MojoInputBridge;
 import gg.corz.IiiIlllliiIlll;
 import gg.corz.llilIllililIll;
 import net.minecraft.class_11908;
@@ -17,6 +18,7 @@ public class MixinKeyboard {
       cancellable = true
    )
    private void onKey(long window, int action, class_11908 input, CallbackInfo ci) {
+      MojoInputBridge.onKeyCallback(input.comp_4795(), action);
       IiiIlllliiIlll event = new IiiIlllliiIlll(input.comp_4795(), action);
       llilIllililIll.IiIiliIiiiIi(event);
       if (event.iIlIlllllill()) {

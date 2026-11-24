@@ -1,5 +1,6 @@
 package com.corz.client.mixins;
 
+import com.corz.client.android.MojoBlurCoordinator;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -65,6 +66,7 @@ public abstract class MixinGameRenderer {
       at = {@At("HEAD")}
    )
    private void corz$gui3dFrame(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
+      MojoBlurCoordinator.beginFrame();
       IIiIiIIllIiIiIIl.IliIlllilIi();
       iIIlIllIlIlIll.IiiIlliiIl();
    }
@@ -85,7 +87,13 @@ public abstract class MixinGameRenderer {
          }
       }
 
-      lIllIiiIllIi.iIlIlllllill();
+      if (!MojoBlurCoordinator.isFallbackActive()) {
+         try {
+            lIllIiiIllIi.iIlIlllllill();
+         } catch (Throwable t) {
+            MojoBlurCoordinator.markBlurOrPostFailure(t);
+         }
+      }
    }
 
    @Inject(
@@ -97,7 +105,11 @@ public abstract class MixinGameRenderer {
 )}
    )
    private void corz$gui3dEnd(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
-      lIllIiiIllIi.IilliliilIIi();
+      try {
+         lIllIiiIllIi.IilliliilIIi();
+      } catch (Throwable t) {
+         MojoBlurCoordinator.markBlurOrPostFailure(t);
+      }
    }
 
    @Inject(
@@ -105,7 +117,11 @@ public abstract class MixinGameRenderer {
       at = {@At("RETURN")}
    )
    private void corz$gui3dLeave(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
-      lIllIiiIllIi.lIiiIiIlilli();
+      try {
+         lIllIiiIllIi.lIiiIiIlilli();
+      } catch (Throwable t) {
+         MojoBlurCoordinator.markBlurOrPostFailure(t);
+      }
    }
 
    @Redirect(

@@ -17,11 +17,11 @@ vec4 knifeSurface(vec2 uv,vec3 normal,vec3 view,vec3 illumination) {
     vec4 material=texture(Sampler1,uv);
     vec3 n=normalize(normal),v=normalize(view);if(dot(n,v)<0.0)n=-n;
     int id=int(round(material.g*255.0));bool metal=id>=230;
-    vec3 albedo=pow(max(color.rgb,vec3(0)),vec3(2.2));
+    vec3 albedo=pow(max(color.rgb,vec3(0.0)),vec3(2.2));
     vec3 f0=metal?conductorF0(id):vec3(material.g);
-    if(metal){if(id==255)f0=albedo;else if(max(color.r,max(color.g,color.b))>.001)f0*=pow(color.rgb,vec3(.45));}
-    vec3 fresnel=f0+(1.0-f0)*pow(1.0-max(dot(n,v),0.0),5.0);
-    float roughness=max(.025,pow(1.0-material.r,2.0));
+    if(metal){if(id==255)f0=albedo;else if(max(color.r,max(color.g,color.b))>.001)f0*=pow(max(color.rgb,vec3(0.0)),vec3(.45));}
+    vec3 fresnel=f0+(1.0-f0)*pow(max(1.0-max(dot(n,v),0.0),0.0),5.0);
+    float roughness=max(.025,pow(max(1.0-material.r,0.0),2.0));
     float exponent=clamp(2.0/(roughness*roughness)-2.0,8.0,512.0);
     vec3 l=normalize(vec3(-.4,.65,.7)),fill=normalize(vec3(.75,.15,-.45));
     float spec=pow(max(dot(n,normalize(l+v)),0.0),exponent)*1.25;

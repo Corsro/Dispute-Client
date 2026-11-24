@@ -1,5 +1,6 @@
 package com.corz.client.mixins;
 
+import com.corz.client.android.MojoInputBridge;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import gg.corz.IIilllilIillli;
 import gg.corz.IiiiIIIlliiiIIIl;
@@ -72,6 +73,7 @@ public class MixinMouse {
       at = {@At("HEAD")}
    )
    private void onMouseButton(long window, class_11910 input, int action, CallbackInfo ci) {
+      MojoInputBridge.onMouseButtonCallback(input.comp_4801(), action);
       IiiiIIIlliiiIIIl event = new IiiiIIIlliiiIIIl(input.comp_4801(), action);
       llilIllililIll.IIIilIIiiIIi(event);
    }

@@ -24,7 +24,7 @@ void main() {
     float dist = median(msd) - EDGE;
 
     vec2 h = vec2(dFdx(texCoord0.x), dFdy(texCoord0.y)) * vec2(textureSize(Sampler0, 0));
-    float pixels = MSDF_RANGE * inversesqrt(h.x * h.x + h.y * h.y);
+    float pixels = MSDF_RANGE * inversesqrt(max(h.x * h.x + h.y * h.y, 1.0e-8));
 
     float alpha = smoothstep(-SMOOTHNESS, SMOOTHNESS, dist * pixels);
     if (alpha <= 0.001) {

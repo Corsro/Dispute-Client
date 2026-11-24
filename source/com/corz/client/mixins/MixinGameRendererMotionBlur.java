@@ -1,6 +1,8 @@
 package com.corz.client.mixins;
 
+import com.corz.client.android.MojoBlurCoordinator;
 import gg.corz.lllIIlIlillIIlIl;
+import net.minecraft.class_310;
 import net.minecraft.class_757;
 import net.minecraft.class_9779;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +17,14 @@ public abstract class MixinGameRendererMotionBlur {
       at = {@At("TAIL")}
    )
    private void corz$motionBlurWorldDrawn(class_9779 tickCounter, CallbackInfo ci) {
-      lllIIlIlillIIlIl.iiiIlIIIll();
+      if (!MojoBlurCoordinator.shouldAllowMotionBlur(class_310.method_1551().field_1755 != null)) {
+         return;
+      }
+      try {
+         lllIIlIlillIIlIl.iiiIlIIIll();
+      } catch (Throwable t) {
+         MojoBlurCoordinator.markBlurOrPostFailure(t);
+      }
    }
 
    @Inject(
@@ -26,6 +35,13 @@ public abstract class MixinGameRendererMotionBlur {
 )}
    )
    private void corz$motionBlurBeforeHud(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
-      lllIIlIlillIIlIl.lIIlliIIll();
+      if (!MojoBlurCoordinator.shouldAllowMotionBlur(class_310.method_1551().field_1755 != null)) {
+         return;
+      }
+      try {
+         lllIIlIlillIIlIl.lIIlliIIll();
+      } catch (Throwable t) {
+         MojoBlurCoordinator.markBlurOrPostFailure(t);
+      }
    }
 }

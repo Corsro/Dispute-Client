@@ -1,4 +1,4 @@
-#version 150
+#version 330
 
 in vec2 texCoord;
 out vec4 fragColor;
@@ -156,13 +156,13 @@ void diskHit(vec3 P, vec3 v, vec3 n, vec3 e1, vec3 e2, float t, float image, ino
     float n1 = fbm3(vec3(cs * 1.6, r * 0.62));
     float n2 = noise3(vec3(cs * 4.0, r * 1.45 + 3.0));
     float dens = smoothstep(0.14, 0.88, mix(n1, 0.66 * n1 + 0.34 * n2, detail));
-    float u = R_IN / r;
-    float temp = pow(u, 0.75) * pow(max(1.0 - sqrt(u), 0.0), 0.25) / 0.488;
+    float u = max(R_IN / max(r, 1.0e-4), 1.0e-5);
+    float temp = pow(u, 0.75) * pow(max(1.0 - sqrt(u), 1.0e-5), 0.25) / 0.488;
     vec3 orbit = normalize(cross(n, P));
-    float beta = sqrt(0.5 / r);
-    float gamma = inversesqrt(1.0 - beta * beta);
-    float dop = 1.0 / (gamma * (1.0 - beta * dot(orbit, -normalize(v))));
-    float g = dop * sqrt(max(1.0 - 1.0 / r, 0.0));
+    float beta = sqrt(0.5 / max(r, 0.5001));
+    float gamma = inversesqrt(max(1.0 - beta * beta, 1.0e-5));
+    float dop = 1.0 / max(gamma * (1.0 - beta * dot(orbit, -normalize(v))), 1.0e-5);
+    float g = max(dop * sqrt(max(1.0 - 1.0 / max(r, 1.0), 0.0)), 0.0);
     float lum = pow(g, 3.0) * (0.25 + 0.75 * temp);
     vec3 c = diskTemp(temp * g) * lum * (0.40 + 1.15 * dens) * 1.7;
     float al = clamp((0.30 + 0.85 * dens) * edge, 0.0, 0.97);

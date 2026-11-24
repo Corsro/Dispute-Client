@@ -90,21 +90,135 @@ public final class Runtime {
       return var0 instanceof Number ? ((Number)var0).longValue() : 0L;
    }
 
+   private static volatile boolean nativeLoaded = false;
+   private static volatile Throwable nativeLoadError = null;
+
+   public static boolean isNativeLoaded() {
+      return nativeLoaded;
+   }
+
+   public static Throwable getNativeLoadError() {
+      return nativeLoadError;
+   }
+
    static {
-      if (System.getProperty("java.runtime.name", "").toLowerCase().contains("android")) {
-         System.loadLibrary("vm");
-      } else {
-         String var0 = System.getProperty("os.name").toLowerCase();
-         String var1 = System.getProperty("os.arch").toLowerCase();
-         StringBuilder var10000 = new StringBuilder("native/");
-         var10000 = !var0.contains("win") ? (!var0.contains("mac") ? var10000.append("linux-") : var10000.append("macos-")) : var10000.append("windows-");
-         var10000 = !var1.contains("aarch64") && !var1.contains("arm64") ? var10000.append("x86_64/") : var10000.append("aarch64/");
-         String var2 = (!var0.contains("win") ? (!var0.contains("mac") ? var10000.append("libvm.so") : var10000.append("libvm.dylib")) : var10000.append("vm.dll")).toString();
-         InputStream var3 = Runtime.class.getResourceAsStream(var2);
-         File var4 = File.createTempFile("qvm", !var0.contains("win") ? (!var0.contains("mac") ? ".so" : ".dylib") : ".dll");
-         var4.deleteOnExit();
-         Files.copy(var3, var4.toPath(), new CopyOption[]{StandardCopyOption.REPLACE_EXISTING});
-         System.load(var4.getAbsolutePath());
+      Throwable lastError = null;
+      try {
+         String runtimeName = System.getProperty("java.runtime.name", "").toLowerCase();
+         String osVersion = System.getProperty("os.version", "").toLowerCase();
+         String tmpDirProp = System.getProperty("java.io.tmpdir", "").toLowerCase();
+         String libPathProp = System.getProperty("java.library.path", "").toLowerCase();
+
+         boolean isAndroidRuntime = runtimeName.contains("android")
+            || osVersion.contains("android")
+            || tmpDirProp.contains("/data/data/")
+            || tmpDirProp.contains("/data/user/")
+            || libPathProp.contains("mojo")
+            || libPathProp.contains("pojav")
+            || System.getenv("ANDROID_ROOT") != null
+            || System.getenv("ANDROID_DATA") != null
+            || System.getenv("MOJO_RENDERER") != null
+            || System.getenv("POJAVEXEC_EGL") != null
+            || System.getenv("POJAV_LOAD_TURNIP") != null
+            || System.getenv("MOJO_ENVIRON") != null
+            || System.getenv("POJAV_ENVIRON") != null
+            || Files.exists(java.nio.file.Path.of("/system/build.prop"))
+            || Files.exists(java.nio.file.Path.of("/data/data/git.artdeell.mojo"));
+
+         String osArch = System.getProperty("os.arch", "").toLowerCase();
+         String archDir = (osArch.contains("aarch64") || osArch.contains("arm64")) ? "aarch64" : "x86_64";
+
+         if (isAndroidRuntime) {
+            String basePrefix = "native/android-" + archDir + "/";
+            File nativeDir = resolveWritableNativeDir("corz-qvm-android-" + archDir);
+            // Load ordered runtime prerequisites first into the same clns linker namespace ($ORIGIN)
+            tryExtractAndLoadIfPresent(basePrefix + "libc++_shared.so", new File(nativeDir, "libc++_shared.so"));
+            tryExtractAndLoadIfPresent(basePrefix + "libcorz_bionic_shim.so", new File(nativeDir, "libcorz_bionic_shim.so"));
+
+            File vmOut = new File(nativeDir, "libvm.so");
+            if (extractResource(basePrefix + "libvm.so", vmOut)) {
+               System.load(vmOut.getAbsolutePath());
+               nativeLoaded = true;
+            } else {
+               try {
+                  System.loadLibrary("vm");
+                  nativeLoaded = true;
+               } catch (Throwable androidLibErr) {
+                  lastError = new UnsatisfiedLinkError(
+                     "Failed to load Android QVM native library (" + basePrefix + "libvm.so or libvm.so via System.loadLibrary). Original error: " + androidLibErr
+                  );
+                  lastError.initCause(androidLibErr);
+               }
+            }
+         } else {
+            String osName = System.getProperty("os.name", "").toLowerCase();
+            StringBuilder resPath = new StringBuilder("native/");
+            resPath.append(osName.contains("win") ? "windows-" : (osName.contains("mac") ? "macos-" : "linux-"));
+            resPath.append(archDir).append("/");
+            resPath.append(osName.contains("win") ? "vm.dll" : (osName.contains("mac") ? "libvm.dylib" : "libvm.so"));
+            String resourceName = resPath.toString();
+
+            String suffix = osName.contains("win") ? ".dll" : (osName.contains("mac") ? ".dylib" : ".so");
+            File tmp = File.createTempFile("qvm", suffix);
+            tmp.deleteOnExit();
+            if (extractResource(resourceName, tmp)) {
+               System.load(tmp.getAbsolutePath());
+               nativeLoaded = true;
+            } else {
+               lastError = new UnsatisfiedLinkError("Missing QVM native library resource: " + resourceName);
+            }
+         }
+      } catch (Throwable t) {
+         lastError = t;
+      }
+
+      if (!nativeLoaded) {
+         nativeLoadError = lastError != null ? lastError : new UnsatisfiedLinkError("Unknown QVM initialization error");
+         System.err.println("[CorzClient/QVM] CRITICAL: Failed to initialize QVM native library: " + nativeLoadError);
+         nativeLoadError.printStackTrace(System.err);
+         if (nativeLoadError instanceof UnsatisfiedLinkError ule) {
+            throw ule;
+         }
+         UnsatisfiedLinkError wrapped = new UnsatisfiedLinkError("Failed to initialize QVM native library: " + nativeLoadError.getMessage());
+         wrapped.initCause(nativeLoadError);
+         throw wrapped;
+      }
+   }
+
+   private static File resolveWritableNativeDir(String folderName) {
+      String tmpBase = System.getProperty("java.io.tmpdir", "");
+      if (tmpBase != null && !tmpBase.isEmpty()) {
+         File dir = new File(tmpBase, folderName);
+         if ((dir.exists() || dir.mkdirs()) && dir.canWrite()) {
+            return dir;
+         }
+      }
+      File fallback = new File(folderName);
+      fallback.mkdirs();
+      return fallback;
+   }
+
+   private static boolean extractResource(String resourcePath, File targetFile) {
+      InputStream in = Runtime.class.getResourceAsStream(resourcePath);
+      if (in == null) {
+         in = Runtime.class.getResourceAsStream("/" + resourcePath);
+      }
+      if (in == null) {
+         return false;
+      }
+      try (InputStream stream = in) {
+         Files.copy(stream, targetFile.toPath(), new CopyOption[]{StandardCopyOption.REPLACE_EXISTING});
+         targetFile.setReadable(true, false);
+         targetFile.setExecutable(true, false);
+         return true;
+      } catch (Throwable t) {
+         throw new RuntimeException("Failed extracting native resource " + resourcePath + " to " + targetFile, t);
+      }
+   }
+
+   private static void tryExtractAndLoadIfPresent(String resourcePath, File targetFile) {
+      if (extractResource(resourcePath, targetFile)) {
+         System.load(targetFile.getAbsolutePath());
       }
    }
 

@@ -1,0 +1,138 @@
+name: Build CorzClient Android (Mojo ARM64) Port
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-android-mojo:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository with Git LFS
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Java 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Android NDK (r27c)
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r27c
+          add-to-path: false
+
+      - name: Install patchelf and ELF inspection tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf binutils zip unzip
+
+      - name: Extract upstream CorzClient JAR & native libs from Git LFS Corz-Client.zip
+        run: |
+          python3 tools/prepare_upstream_jar.py
+          cat build/upstream/paths.env >> "$GITHUB_ENV"
+
+      - name: Inspect upstream libvm.so ELF headers (pre-patch)
+        run: |
+          mkdir -p build/reports
+          {
+            echo "=== Upstream linux-aarch64/libvm.so file ==="
+            file "$UPSTREAM_LINUX_ARM64_VM"
+            echo "=== Dynamic tags (readelf -d) ==="
+            readelf -d "$UPSTREAM_LINUX_ARM64_VM"
+            echo "=== JNI / exported symbols ==="
+            nm -D --defined-only "$UPSTREAM_LINUX_ARM64_VM" | grep -E "JNI_OnLoad|Java_com_corz_client_qvm_Runtime" || true
+            echo "=== Undefined symbols count ==="
+            nm -Du "$UPSTREAM_LINUX_ARM64_VM" | wc -l
+          } > build/reports/libvm_elf_report.txt
+          cat build/reports/libvm_elf_report.txt
+
+      - name: Build Android ARM64 NDK Bionic shim & patch libvm.so for clns-4
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          chmod +x android-native/build_ndk_shim.sh
+          ./android-native/build_ndk_shim.sh build/android-native "$UPSTREAM_LINUX_ARM64_VM"
+          {
+            echo ""
+            echo "=== Patched android-aarch64/libvm.so dynamic tags ==="
+            "${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" -d build/android-native/libvm.so
+            echo "=== Built libcorz_bionic_shim.so dynamic tags ==="
+            "${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf" -d build/android-native/libcorz_bionic_shim.so
+          } >> build/reports/libvm_elf_report.txt
+
+      - name: Fetch MC 1.21.11 intermediary + Fabric + Mixin + ASM compile classpath
+        run: |
+          python3 tools/fetch_mc_compile_classpath.py
+
+      - name: Compile CorzBytecodePatcher and apply ASM patches to gg/corz/*.class
+        run: |
+          mkdir -p build/tools-classes build/patched
+          ASM_CP="$(cat build/deps/asm_classpath.txt)"
+          javac --release 21 -cp "$ASM_CP" -d build/tools-classes tools/CorzBytecodePatcher.java
+          java -cp "build/tools-classes:$ASM_CP" CorzBytecodePatcher \
+            "$UPSTREAM_MOD_JAR" \
+            build/patched/corzclient-asm-patched.jar \
+            build/reports/asm_patch_report.txt
+
+      - name: Compile Android compat classes, QVM Runtime, CorzClient, and Mixins
+        run: |
+          mkdir -p build/mod-classes build/compile-sources
+          MC_CP="$(cat build/deps/compile_classpath.txt)"
+          FULL_CP="build/patched/corzclient-asm-patched.jar:$MC_CP"
+
+          cat <<'EOF' > build/compile-sources/sources.txt
+source/com/corz/client/android/AndroidFilePicker.java
+source/com/corz/client/android/AndroidRuntimeEnv.java
+source/com/corz/client/android/CompatFileDialog.java
+source/com/corz/client/android/MojoBlurCoordinator.java
+source/com/corz/client/android/MojoInputBridge.java
+source/com/corz/client/qvm/Runtime.java
+source/com/corz/client/CorzClient.java
+source/com/corz/client/mixins/MixinWindow.java
+source/com/corz/client/mixins/MixinMouse.java
+source/com/corz/client/mixins/MixinKeyboard.java
+source/com/corz/client/mixins/MixinGameRenderer.java
+source/com/corz/client/mixins/MixinGameRendererMotionBlur.java
+source/com/corz/client/mixins/MixinHeldItemRenderer.java
+EOF
+          echo "Compiling $(wc -l < build/compile-sources/sources.txt) modified/new Java files against intermediary MC 1.21.11 + upstream gg.corz..."
+
+          javac --release 21 -encoding UTF-8 -Xlint:none -cp "$FULL_CP" -d build/mod-classes @build/compile-sources/sources.txt
+
+      - name: Assemble & verify final CorzClient-2.0.1-Android-Mojo JAR
+        run: |
+          LLVM_READELF="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
+          python3 tools/overlay_and_verify_jar.py \
+            --asm-jar build/patched/corzclient-asm-patched.jar \
+            --compiled-classes build/mod-classes \
+            --android-native-dir build/android-native \
+            --shaders-dir source/assets/corzclient/shaders \
+            --output-jar build/dist/CorzClient-2.0.1-Android-Mojo.jar \
+            --report build/reports/jar_verification_report.txt \
+            --readelf "$LLVM_READELF"
+
+          # Also create an install-ready bundle if Corz-Client.zip had companion mods/bootstrap
+          cp build/dist/CorzClient-2.0.1-Android-Mojo.jar "$UPSTREAM_MOD_JAR"
+          if [ -n "$(find build/upstream/unpacked -maxdepth 3 -type f 2>/dev/null)" ]; then
+            (cd build/upstream/unpacked && zip -r ../../dist/CorzClient-2.0.1-Android-Mojo-Bundle.zip .)
+          fi
+
+      - name: Upload built JAR & verification reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: CorzClient-2.0.1-Android-Mojo
+          path: |
+            build/dist/*.jar
+            build/dist/*.zip
+            build/reports/*.txt
+          if-no-files-found: error
