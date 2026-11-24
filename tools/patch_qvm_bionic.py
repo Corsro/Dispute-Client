@@ -282,7 +282,9 @@ def main():
     needed_after = get_dynamic_needed(args.readelf, args.output)
     print("DT_NEEDED after:", needed_after)
 
-    shutil.copy2(args.shim, os.path.join(args.out_dir, "libcorz_bionic_shim.so"))
+    dest_shim = os.path.join(args.out_dir, "libcorz_bionic_shim.so")
+    if os.path.abspath(args.shim) != os.path.abspath(dest_shim):
+        shutil.copy2(args.shim, dest_shim)
     available_libs = [
         args.shim,
         os.path.join(args.ndk_sysroot_lib, "libc.so"),
