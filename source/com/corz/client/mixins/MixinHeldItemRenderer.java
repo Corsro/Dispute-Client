@@ -1,16 +1,16 @@
 package com.corz.client.mixins;
 
-import gg.corz.IIIiIllllIIiIlll;
-import gg.corz.IIlllIIilIlllIIi;
-import gg.corz.IilliiIllilliiIl;
-import gg.corz.IlIliIlllIliIl;
-import gg.corz.IlllIIllllllIIll;
-import gg.corz.iIiIIIilIliIIIil;
-import gg.corz.iIiiliIiIliiliIi;
-import gg.corz.iiiIIlllIIIlIlll;
-import gg.corz.illIIlllIilIIlll;
-import gg.corz.llilIllililIll;
-import gg.corz.lllIlIlillIlIl;
+import gg.corz.IIIiIliii;
+import gg.corz.IIIiiiIIl;
+import gg.corz.IIIiiilii;
+import gg.corz.IIIiilill;
+import gg.corz.IIIilIlil;
+import gg.corz.IIIilliI;
+import gg.corz.IIIlIlIi;
+import gg.corz.IIIlilli;
+import gg.corz.IIiIIIlIl;
+import gg.corz.IIilIiliI;
+import gg.corz.IIllIIlil;
 import java.lang.reflect.Method;
 import java.util.function.IntToDoubleFunction;
 import net.minecraft.class_11659;
@@ -92,7 +92,7 @@ public abstract class MixinHeldItemRenderer {
       at = {@At("HEAD")}
    )
    private void corz$beforeHands(float tickProgress, class_4587 matrices, class_11659 queue, class_746 player, int light, CallbackInfo ci) {
-      IilliiIllilliiIl.IliIlllilIi().Iiiiliiiiiii();
+      IIIiIliii.III().IIlIi();
    }
 
    @Inject(
@@ -100,17 +100,17 @@ public abstract class MixinHeldItemRenderer {
       at = {@At("TAIL")}
    )
    private void corz$afterHands(float tickProgress, class_4587 matrices, class_11659 queue, class_746 player, int light, CallbackInfo ci) {
-      IilliiIllilliiIl renderer = IilliiIllilliiIl.IliIlllilIi();
-      renderer.IIIIllIIIl();
-      renderer.iIIIlIlIIl();
+      IIIiIliii renderer = IIIiIliii.III();
+      renderer.IIllI();
+      renderer.IIlll();
    }
 
    @Inject(
       method = {"method_3219(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;IFFLnet/minecraft/class_1306;)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_1007;method_4220(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;ILnet/minecraft/class_2960;Z)V"
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_1007;method_4220(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;ILnet/minecraft/class_2960;Z)V"
+      )}
    )
    private void corz$knifeRightArm(class_4587 matrices, class_11659 queue, int light, float equipProgress, float swingProgress, class_1306 arm, CallbackInfo ci) {
       this.corz$poseKnifeArm(matrices);
@@ -119,9 +119,9 @@ public abstract class MixinHeldItemRenderer {
    @Inject(
       method = {"method_3219(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;IFFLnet/minecraft/class_1306;)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_1007;method_4221(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;ILnet/minecraft/class_2960;Z)V"
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_1007;method_4221(Lnet/minecraft/class_4587;Lnet/minecraft/class_11659;ILnet/minecraft/class_2960;Z)V"
+      )}
    )
    private void corz$knifeLeftArm(class_4587 matrices, class_11659 queue, int light, float equipProgress, float swingProgress, class_1306 arm, CallbackInfo ci) {
       this.corz$poseKnifeArm(matrices);
@@ -136,14 +136,14 @@ public abstract class MixinHeldItemRenderer {
    }
 
    @Unique
-   private boolean corz$renderKnifeInHand(IIlllIIilIlllIIi si, illIIlllIilIIlll rig, class_742 player, class_1306 arm, class_1799 item, float swingProgress, float equipProgress, class_4587 matrices, class_11659 queue, int light) {
-      boolean meshes = IIIiIllllIIiIlll.IIIllIIliIIl(rig);
-      if (!meshes && !si.ilIIiIiIIi(rig)) {
+   private boolean corz$renderKnifeInHand(IIiIIIlIl si, IIIiilill rig, class_742 player, class_1306 arm, class_1799 item, float swingProgress, float equipProgress, class_4587 matrices, class_11659 queue, int light) {
+      boolean meshes = IIIiiilii.IIlI(rig);
+      if (!meshes && !si.IIlIIl(rig)) {
          return false;
       } else {
          int side = arm == class_1306.field_6183 ? 1 : -1;
-         IntToDoubleFunction ch = iIiIIIilIliIIIil.iliIiiliiiii(si.lIliliIlil(swingProgress), (double)swingProgress);
-         this.corz$knifeCorrection = corz$matrix(iIiIIIilIliIIIil.liiiIIllIl(side, ch));
+         IntToDoubleFunction ch = IIllIIlil.IIIi(si.IIIlii(swingProgress), (double)swingProgress);
+         this.corz$knifeCorrection = corz$matrix(IIllIIlil.IIl(side, ch));
          this.corz$knifeArmEntry = null;
          matrices.method_22903();
 
@@ -164,38 +164,38 @@ public abstract class MixinHeldItemRenderer {
             try {
                matrices.method_23760().method_66521(armEntry);
                ((class_591)this.field_4046.method_74405(player).method_4038()).method_2808(arm).method_22703(matrices);
-               matrices.method_34425(corz$matrix(iIiIIIilIliIIIil.IilliliilIIi(side, 0.48, ch, player.method_52814().comp_1629() == class_7920.field_41122)));
+               matrices.method_34425(corz$matrix(IIllIIlil.IIII(side, 0.48D, ch, player.method_52814().comp_1629() == class_7920.field_41122)));
                float[] pose = new float[3];
                class_811 ctx = arm == class_1306.field_6183 ? class_811.field_4322 : class_811.field_4321;
-               lllIlIlillIlIl finish = meshes ? iiiIIlllIIIlIlll.liiiIIllIl(rig, IlIliIlllIliIl.IIIllIIliIIl(si.IlIIillIIi())) : null;
+               IIIlIlIi finish = meshes ? IIIiiiIIl.IIl(rig, IIIlilli.IIlI(si.IIlIII())) : null;
 
-               for(int i = 0; i < rig.IlIlllIlilIl(); ++i) {
+               for (int i = 0; i < rig.IIll(); ++i) {
                   matrices.method_22903();
 
                   try {
-                     rig.IIlllIlliIll(i, ch, pose);
+                     rig.IIiI(i, ch, pose);
                      matrices.method_46416(pose[1], pose[2], 0.0F);
                      matrices.method_22907(class_7833.field_40718.rotationDegrees(pose[0]));
-                     IIIiIllllIIiIlll mesh = meshes ? IIIiIllllIIiIlll.iliIiiliiiii(rig.IiIlliIliiIl(i).IliIlllilIi()) : null;
-                     iIiiliIiIliiliIi skin = finish != null ? finish.IliIlllilIi(i) : null;
-                     if (mesh != null && mesh.Iiilliiliiil(skin)) {
-                        queue.method_73483(matrices, finish.llIlIIIllilIlIIIll, (entry, vc) -> mesh.IIIilIIiiIIi(entry, vc, light, class_4608.field_21444, skin));
-                        if (finish.liiiIIllIl(i)) {
-                           queue.method_73529(1).method_73483(matrices, finish.IiIlIIIllliIlIIIll, (entry, vc) -> mesh.IlIillIiilIi(entry, vc, skin));
+                     IIIiiilii mesh = meshes ? IIIiiilii.IIIi(rig.IIli(i).IIIIlililIlI()) : null;
+                     IIilIiliI skin = finish != null ? finish.III(i) : null;
+                     if (mesh != null && mesh.IIIIi(skin)) {
+                        queue.method_73483(matrices, finish.IIIlllIlli, (entry, vc) -> mesh.IIIlI(entry, vc, light, class_4608.field_21444, skin));
+                        if (finish.IIl(i)) {
+                           queue.method_73529(1).method_73483(matrices, finish.IIIlllIliI, (entry, vc) -> mesh.IIIll(entry, vc, skin));
                         }
 
                         if (item.method_7958()) {
-                           queue.method_73483(matrices, class_12249.method_75997(), (entry, vc) -> mesh.Ililllililil(entry, vc, light, class_4608.field_21444));
+                           queue.method_73483(matrices, class_12249.method_75997(), (entry, vc) -> mesh.IIIIl(entry, vc, light, class_4608.field_21444));
                         }
                      } else if (mesh != null) {
-                        queue.method_73483(matrices, IIIiIllllIIiIlll.Illlllllilll(), (entry, vc) -> mesh.Ililllililil(entry, vc, light, class_4608.field_21444));
+                        queue.method_73483(matrices, IIIiiilii.IIil(), (entry, vc) -> mesh.IIIIl(entry, vc, light, class_4608.field_21444));
                         if (item.method_7958()) {
-                           queue.method_73483(matrices, class_12249.method_75997(), (entry, vc) -> mesh.Ililllililil(entry, vc, light, class_4608.field_21444));
+                           queue.method_73483(matrices, class_12249.method_75997(), (entry, vc) -> mesh.IIIIl(entry, vc, light, class_4608.field_21444));
                         }
                      } else {
                         matrices.method_46416(8.0F, 8.0F, 8.0F);
                         matrices.method_22905(16.0F, 16.0F, 16.0F);
-                        this.method_3233(player, si.liIIiiiIIi(item, rig, i), ctx, matrices, queue, light);
+                        this.method_3233(player, si.IIlIIi(item, rig, i), ctx, matrices, queue, light);
                      }
                   } finally {
                      matrices.method_22909();
@@ -216,8 +216,8 @@ public abstract class MixinHeldItemRenderer {
    }
 
    @Unique
-   private IlllIIllllllIIll corz$handCustomer() {
-      return (IlllIIllllllIIll)llilIllililIll.iliIiiliiiii(IlllIIllllllIIll.class);
+   private IIIilIlil corz$handCustomer() {
+      return (IIIilIlil)IIIilliI.IIIi(IIIilIlil.class);
    }
 
    @Inject(
@@ -226,14 +226,14 @@ public abstract class MixinHeldItemRenderer {
       cancellable = true
    )
    private void corz$renderFirstPersonItem(class_742 player, float tickProgress, float pitch, class_1268 hand, float swingProgress, class_1799 item, float equipProgress, class_4587 matrices, class_11659 orderedRenderCommandQueue, int light, CallbackInfo ci) {
-      IIlllIIilIlllIIi si = (IIlllIIilIlllIIi)llilIllililIll.iliIiiliiiii(IIlllIIilIlllIIi.class);
-      if (si != null && si.IIiillIiil(player, hand, item)) {
-         si.lliililiil(player, item, matrices, orderedRenderCommandQueue, light);
+      IIiIIIlIl si = (IIiIIIlIl)IIIilliI.IIIi(IIiIIIlIl.class);
+      if (si != null && si.IIIilI(player, hand, item)) {
+         si.IIIili(player, item, matrices, orderedRenderCommandQueue, light);
          ci.cancel();
       } else {
          if (si != null && !player.method_31550() && !player.method_5767()) {
-            illIIlllIilIIlll rig = si.IiIilliIil(player, hand, item);
-            if (rig != null && (rig != illIIlllIilIIlll.liIIIIIill || si.iIiilIliil()) && (!player.method_6115() || player.method_6058() != hand)) {
+            IIIiilill rig = si.IIIliI(player, hand, item);
+            if (rig != null && (rig != IIIiilill.IIliIIiliIl || si.IIIill()) && (!player.method_6115() || player.method_6058() != hand)) {
                class_1306 kArm = player.method_6068();
                if (this.corz$renderKnifeInHand(si, rig, player, kArm, item, swingProgress, equipProgress, matrices, orderedRenderCommandQueue, light)) {
                   ci.cancel();
@@ -242,27 +242,27 @@ public abstract class MixinHeldItemRenderer {
             }
          }
 
-         if (si != null && si.IilIililIi(hand, item) && !player.method_31550()) {
+         if (si != null && si.IIlIiI(hand, item) && !player.method_31550()) {
             ci.cancel();
             class_1306 iArm = hand == class_1268.field_5808 ? player.method_6068() : player.method_6068().method_5928();
             int iSide = iArm == class_1306.field_6183 ? 1 : -1;
             matrices.method_22903();
-            si.llIliilIli(matrices, iSide, iArm);
+            si.IIllli(matrices, iSide, iArm);
             if (!player.method_5767()) {
                matrices.method_22903();
-               si.IiIliliIli(matrices, iSide, iArm);
+               si.IIlliI(matrices, iSide, iArm);
                this.method_3219(matrices, orderedRenderCommandQueue, light, equipProgress, 0.0F, iArm);
                matrices.method_22909();
             }
 
             this.method_3224(matrices, iArm, equipProgress);
-            si.iiIliIIlli(matrices, iSide, iArm);
-            si.lIlliiIlli(matrices, iSide, iArm);
+            si.IIllil(matrices, iSide, iArm);
+            si.IIllii(matrices, iSide, iArm);
             this.method_3233(player, item, iArm == class_1306.field_6183 ? class_811.field_4322 : class_811.field_4321, matrices, orderedRenderCommandQueue, light);
             matrices.method_22909();
          } else {
-            IlllIIllllllIIll hc = this.corz$handCustomer();
-            if (hc != null && hc.iiiIlIIIll()) {
+            IIIilIlil hc = this.corz$handCustomer();
+            if (hc != null && hc.IIiil()) {
                if (!player.method_31550()) {
                   ci.cancel();
                   this.corz$renderFirstPersonItemInternal(hc, player, tickProgress, pitch, hand, swingProgress, item, equipProgress, matrices, orderedRenderCommandQueue, light);
@@ -273,21 +273,21 @@ public abstract class MixinHeldItemRenderer {
    }
 
    @Unique
-   private void corz$renderFirstPersonItemInternal(IlllIIllllllIIll hc, class_742 player, float tickProgress, float pitch, class_1268 hand, float swingProgress, class_1799 item, float equipProgress, class_4587 matrices, class_11659 orderedRenderCommandQueue, int light) {
+   private void corz$renderFirstPersonItemInternal(IIIilIlil hc, class_742 player, float tickProgress, float pitch, class_1268 hand, float swingProgress, class_1799 item, float equipProgress, class_4587 matrices, class_11659 orderedRenderCommandQueue, int light) {
       boolean isMainHand = hand == class_1268.field_5808;
       class_1306 arm = isMainHand ? player.method_6068() : player.method_6068().method_5928();
       matrices.method_22903();
       if (item.method_7960()) {
-         if (hc.iiiIlIIIll()) {
-            hc.lIIlliIIll(matrices, arm);
+         if (hc.IIiil()) {
+            hc.IIiii(matrices, arm);
          }
 
          if (isMainHand && !player.method_5767()) {
             this.method_3219(matrices, orderedRenderCommandQueue, light, equipProgress, swingProgress, arm);
          }
       } else if (item.method_57826(class_9334.field_49646)) {
-         if (hc.iiiIlIIIll()) {
-            hc.lIIlliIIll(matrices, arm);
+         if (hc.IIiil()) {
+            hc.IIiii(matrices, arm);
          }
 
          if (isMainHand && this.field_4048.method_7960()) {
@@ -296,8 +296,8 @@ public abstract class MixinHeldItemRenderer {
             this.method_3222(matrices, orderedRenderCommandQueue, light, equipProgress, arm, swingProgress, item);
          }
       } else if (item.method_31574(class_1802.field_8399)) {
-         if (hc.iiiIlIIIll()) {
-            hc.lIIlliIIll(matrices, arm);
+         if (hc.IIiil()) {
+            hc.IIiii(matrices, arm);
          }
 
          this.method_3224(matrices, arm, equipProgress);
@@ -334,8 +334,8 @@ public abstract class MixinHeldItemRenderer {
          boolean isRightArm = arm == class_1306.field_6183;
          int side = isRightArm ? 1 : -1;
          if (player.method_6115() && player.method_6014() > 0 && player.method_6058() == hand) {
-            if (hc.iiiIlIIIll()) {
-               hc.lIIlliIIll(matrices, arm);
+            if (hc.IIiil()) {
+               hc.IIiii(matrices, arm);
             }
 
             class_1839 useAction = item.method_7976();
@@ -387,20 +387,20 @@ public abstract class MixinHeldItemRenderer {
                   matrices.method_22907(class_7833.field_40714.rotationDegrees(-55.0F));
                   matrices.method_22907(class_7833.field_40716.rotationDegrees((float)side * 35.3F));
                   matrices.method_22907(class_7833.field_40718.rotationDegrees((float)side * -9.785F));
-                  float f = (float)item.method_7935(player) - ((float)player.method_6014() - tickProgress + 1.0F);
-                  float g = f / 10.0F;
-                  if (g > 1.0F) {
-                     g = 1.0F;
+                  float f2 = (float)item.method_7935(player) - ((float)player.method_6014() - tickProgress + 1.0F);
+                  float g2 = f2 / 10.0F;
+                  if (g2 > 1.0F) {
+                     g2 = 1.0F;
                   }
 
-                  if (g > 0.1F) {
-                     float h = class_3532.method_15374((double)((f - 0.1F) * 1.3F));
-                     float k = h * (g - 0.1F);
+                  if (g2 > 0.1F) {
+                     float h = class_3532.method_15374((double)((f2 - 0.1F) * 1.3F));
+                     float k = h * (g2 - 0.1F);
                      matrices.method_46416(k * 0.0F, k * 0.004F, k * 0.0F);
                   }
 
-                  matrices.method_46416(0.0F, 0.0F, g * 0.2F);
-                  matrices.method_22905(1.0F, 1.0F, 1.0F + g * 0.2F);
+                  matrices.method_46416(0.0F, 0.0F, g2 * 0.2F);
+                  matrices.method_22905(1.0F, 1.0F, 1.0F + g2 * 0.2F);
                   matrices.method_22907(class_7833.field_40715.rotationDegrees((float)side * 45.0F));
                   break;
                case field_42717:
@@ -411,12 +411,12 @@ public abstract class MixinHeldItemRenderer {
                   break;
                case field_8951:
                   matrices.method_46416((float)side * 0.56F, -0.52F, -0.72F);
-                  float f = (float)item.method_7935(player) - ((float)player.method_6014() - tickProgress + 1.0F);
-                  corz$invokeLancingUse(player.method_75879(tickProgress), matrices, f, arm, item);
+                  float f3 = (float)item.method_7935(player) - ((float)player.method_6014() - tickProgress + 1.0F);
+                  corz$invokeLancingUse(player.method_75879(tickProgress), matrices, f3, arm, item);
             }
          } else if (player.method_6123()) {
-            if (hc.iiiIlIIIll()) {
-               hc.lIIlliIIll(matrices, arm);
+            if (hc.IIiil()) {
+               hc.IIiii(matrices, arm);
             }
 
             this.method_3224(matrices, arm, equipProgress);
@@ -425,13 +425,13 @@ public abstract class MixinHeldItemRenderer {
             matrices.method_22907(class_7833.field_40718.rotationDegrees((float)side * -85.0F));
          } else {
             boolean handled = false;
-            if (hc.iiiIlIIIll()) {
-               handled = hc.IlIllllIll(swingProgress, equipProgress, matrices, (float)side, arm);
+            if (hc.IIiil()) {
+               handled = hc.IIIIII(swingProgress, equipProgress, matrices, (float)side, arm);
             }
 
             if (!handled) {
-               if (hc.iiiIlIIIll()) {
-                  hc.lIIlliIIll(matrices, arm);
+               if (hc.IIiil()) {
+                  hc.IIiii(matrices, arm);
                }
 
                this.method_3224(matrices, arm, equipProgress);
@@ -462,7 +462,7 @@ public abstract class MixinHeldItemRenderer {
          try {
             Class<?> lancingClass = Class.forName("net.minecraft.client.render.entity.state.Lancing");
 
-            for(Method m : lancingClass.getDeclaredMethods()) {
+            for (Method m : lancingClass.getDeclaredMethods()) {
                if ((m.getName().equals("method_75391") || m.getName().equals("applySwingTransforms") || m.getName().equals("applySwingOffset")) && m.getParameterCount() == 4) {
                   m.setAccessible(true);
                   corz$applySwingTransformsMethod = m;
@@ -473,9 +473,8 @@ public abstract class MixinHeldItemRenderer {
                   corz$applyUseTransformsMethod = m;
                }
             }
-         } catch (Throwable var5) {
+         } catch (Throwable ignored) {
          }
-
       }
    }
 
@@ -484,11 +483,10 @@ public abstract class MixinHeldItemRenderer {
       corz$resolveLancing();
       if (corz$applySwingTransformsMethod != null) {
          try {
-            corz$applySwingTransformsMethod.invoke((Object)null, swingProgress, matrices, side, arm);
-         } catch (Exception var5) {
+            corz$applySwingTransformsMethod.invoke(null, swingProgress, matrices, side, arm);
+         } catch (Throwable ignored) {
          }
       }
-
    }
 
    @Unique
@@ -496,10 +494,9 @@ public abstract class MixinHeldItemRenderer {
       corz$resolveLancing();
       if (corz$applyUseTransformsMethod != null) {
          try {
-            corz$applyUseTransformsMethod.invoke((Object)null, time, matrices, f, arm, item);
-         } catch (Exception var6) {
+            corz$applyUseTransformsMethod.invoke(null, time, matrices, f, arm, item);
+         } catch (Throwable ignored) {
          }
       }
-
    }
 }

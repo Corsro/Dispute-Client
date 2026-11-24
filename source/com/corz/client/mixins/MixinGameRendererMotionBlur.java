@@ -1,7 +1,7 @@
 package com.corz.client.mixins;
 
 import com.corz.client.android.MojoBlurCoordinator;
-import gg.corz.lllIIlIlillIIlIl;
+import gg.corz.IIIlIllIl;
 import net.minecraft.class_310;
 import net.minecraft.class_757;
 import net.minecraft.class_9779;
@@ -21,7 +21,7 @@ public abstract class MixinGameRendererMotionBlur {
          return;
       }
       try {
-         lllIIlIlillIIlIl.iiiIlIIIll();
+         IIIlIllIl.IIiil();
       } catch (Throwable t) {
          MojoBlurCoordinator.markBlurOrPostFailure(t);
       }
@@ -30,16 +30,16 @@ public abstract class MixinGameRendererMotionBlur {
    @Inject(
       method = {"method_3192(Lnet/minecraft/class_9779;Z)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_758;method_71108()V"
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_758;method_71108()V"
+      )}
    )
    private void corz$motionBlurBeforeHud(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
       if (!MojoBlurCoordinator.shouldAllowMotionBlur(class_310.method_1551().field_1755 != null)) {
          return;
       }
       try {
-         lllIIlIlillIIlIl.lIIlliIIll();
+         IIIlIllIl.IIiii();
       } catch (Throwable t) {
          MojoBlurCoordinator.markBlurOrPostFailure(t);
       }

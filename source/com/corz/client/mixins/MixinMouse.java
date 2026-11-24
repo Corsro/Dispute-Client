@@ -2,11 +2,14 @@ package com.corz.client.mixins;
 
 import com.corz.client.android.MojoInputBridge;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import gg.corz.IIilllilIillli;
-import gg.corz.IiiiIIIlliiiIIIl;
-import gg.corz.iIIlIllIlIlIll;
-import gg.corz.iilIIlilIIiIIlil;
-import gg.corz.llilIllililIll;
+import gg.corz.IIIIiIlll;
+import gg.corz.IIIIllIil;
+import gg.corz.IIIilIlI;
+import gg.corz.IIIilliI;
+import gg.corz.IIiIiliii;
+import gg.corz.IIiiIlII;
+import gg.corz.IIllIliII;
+import gg.corz.IIllliiIl;
 import net.minecraft.class_1041;
 import net.minecraft.class_11910;
 import net.minecraft.class_312;
@@ -33,6 +36,16 @@ public class MixinMouse {
    private double corz$cursorDeltaYBefore;
 
    @Inject(
+      method = {"method_55793()V"},
+      at = {@At("HEAD")}
+   )
+   private void corz$uhcBotFrame(CallbackInfo ci) {
+      IIIIllIil.IIIlll();
+      IIllIliII.IIIlIi();
+      IIiIiliii.IIIlll();
+   }
+
+   @Inject(
       method = {"method_1600(JDD)V"},
       at = {@At("HEAD")}
    )
@@ -48,9 +61,9 @@ public class MixinMouse {
    private void corzAfterCursorPos(long window, double newX, double newY, CallbackInfo ci) {
       double deltaX = this.field_1789 - this.corz$cursorDeltaXBefore;
       double deltaY = this.field_1787 - this.corz$cursorDeltaYBefore;
-      if (deltaX != (double)0.0F || deltaY != (double)0.0F) {
-         IIilllilIillli event = new IIilllilIillli(deltaX, deltaY);
-         llilIllililIll.Iiilliiliiil(event);
+      if (deltaX != 0.0D || deltaY != 0.0D) {
+         IIiiIlII event = new IIiiIlII(deltaX, deltaY);
+         IIIilliI.IIIIi(event);
       }
    }
 
@@ -60,12 +73,11 @@ public class MixinMouse {
       cancellable = true
    )
    private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
-      iilIIlilIIiIIlil event = new iilIIlilIIiIIlil(vertical);
-      llilIllililIll.IlIillIiilIi(event);
-      if (event.liiiIIllIl()) {
+      IIllliiIl event = new IIllliiIl(vertical);
+      IIIilliI.IIIll(event);
+      if (event.IIl()) {
          ci.cancel();
       }
-
    }
 
    @Inject(
@@ -74,8 +86,8 @@ public class MixinMouse {
    )
    private void onMouseButton(long window, class_11910 input, int action, CallbackInfo ci) {
       MojoInputBridge.onMouseButtonCallback(input.comp_4801(), action);
-      IiiiIIIlliiiIIIl event = new IiiiIIIlliiiIIIl(input.comp_4801(), action);
-      llilIllililIll.IIIilIIiiIIi(event);
+      IIIIiIlll event = new IIIIiIlll(input.comp_4801(), action);
+      IIIilliI.IIIlI(event);
    }
 
    @ModifyReturnValue(
@@ -83,7 +95,7 @@ public class MixinMouse {
       at = {@At("RETURN")}
    )
    private double corz$gui3dScaledX(double original, class_1041 window) {
-      return iIIlIllIlIlIll.lliililiil(original, this.field_1794, window);
+      return IIIilIlI.IIIili(original, this.field_1794, window);
    }
 
    @ModifyReturnValue(
@@ -91,6 +103,6 @@ public class MixinMouse {
       at = {@At("RETURN")}
    )
    private double corz$gui3dScaledY(double original, class_1041 window) {
-      return iIIlIllIlIlIll.Iiiilliiil(this.field_1795, original, window);
+      return IIIilIlI.IIIiiI(this.field_1795, original, window);
    }
 }

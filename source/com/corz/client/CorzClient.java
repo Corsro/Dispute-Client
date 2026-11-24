@@ -2,44 +2,44 @@ package com.corz.client;
 
 import com.corz.client.android.AndroidRuntimeEnv;
 import com.corz.client.android.MojoInputBridge;
-import gg.corz.IIIIIllllIIIIlll;
-import gg.corz.IIIiiiIllIIiiiIl;
-import gg.corz.IIIiillllIIiilll;
-import gg.corz.IIIiliIilIIiliIi;
-import gg.corz.IIiIIllIiIIl;
-import gg.corz.IIililillIililil;
-import gg.corz.IIliiIlllIliiIll;
-import gg.corz.IIllIIlilIllIIli;
-import gg.corz.Iiliillliliill;
-import gg.corz.IilliIllilliIl;
-import gg.corz.IlIIiillIIii;
-import gg.corz.IlIIilIlllIIilIl;
-import gg.corz.IlIiliIlllIiliIl;
-import gg.corz.IliiIIIilliiIIIi;
-import gg.corz.IliiIilliiIi;
-import gg.corz.Iliiiiilliiiii;
-import gg.corz.iIIiIlIiIlIiIlIi;
-import gg.corz.iIiiIIilIliiIIil;
-import gg.corz.iIlIilIlIllIilIl;
-import gg.corz.iIliiIllii;
-import gg.corz.iiIiliIIlili;
-import gg.corz.iiIliiIIllii;
-import gg.corz.iiiIIIlIIIlIIl;
-import gg.corz.iiillilIIIilil;
-import gg.corz.ilIIlilIiIIlil;
-import gg.corz.ilIlIliIiIlIli;
-import gg.corz.ilIllIiIll;
-import gg.corz.iliiiiiIiiiiii;
-import gg.corz.illIlIilIl;
-import gg.corz.illIllilIilIllil;
-import gg.corz.illlIlIlIillIlIl;
-import gg.corz.illlllIillll;
-import gg.corz.lIIlIIiliIIlIIil;
-import gg.corz.lIiilIIliIiilIIl;
-import gg.corz.lillliiliillliil;
-import gg.corz.llIiiIIlilIiiIIl;
-import gg.corz.llilIllililIll;
-import gg.corz.llillililillil;
+import gg.corz.IIIIIllI;
+import gg.corz.IIIIiiIil;
+import gg.corz.IIIIli;
+import gg.corz.IIIIlii;
+import gg.corz.IIIIlili;
+import gg.corz.IIIIlliIi;
+import gg.corz.IIIIllilI;
+import gg.corz.IIIiIIliI;
+import gg.corz.IIIiIiIli;
+import gg.corz.IIIiilIlI;
+import gg.corz.IIIiill;
+import gg.corz.IIIiillll;
+import gg.corz.IIIilliI;
+import gg.corz.IIIlIIiII;
+import gg.corz.IIIlIiIIi;
+import gg.corz.IIIliiIi;
+import gg.corz.IIIlllill;
+import gg.corz.IIIllllii;
+import gg.corz.IIiIllIil;
+import gg.corz.IIiiill;
+import gg.corz.IIiilIl;
+import gg.corz.IIiili;
+import gg.corz.IIilI;
+import gg.corz.IIilIIi;
+import gg.corz.IIilIiIlI;
+import gg.corz.IIilliIil;
+import gg.corz.IIilllll;
+import gg.corz.IIlIiIil;
+import gg.corz.IIlIlIIIi;
+import gg.corz.IIliIIiii;
+import gg.corz.IIliiilli;
+import gg.corz.IIlillIIi;
+import gg.corz.IIllIIill;
+import gg.corz.IIllIlili;
+import gg.corz.IIlliIil;
+import gg.corz.IIllilII;
+import gg.corz.IIllillli;
+import gg.corz.IIlllIii;
 import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.api.ClientModInitializer;
@@ -52,23 +52,21 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.class_1041;
 import net.minecraft.class_310;
-import net.minecraft.class_3675;
 import net.minecraft.class_437;
 import net.minecraft.class_4587;
 import net.minecraft.class_476;
 import net.minecraft.class_480;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
 
 public class CorzClient implements ClientModInitializer {
-   public static llillililillil fontManager;
+   public static IIlliIil fontManager;
+   private static final Map<IIIIli, Boolean> keyDown = new HashMap<>();
    private static boolean guiKeyWasPressed = false;
-   private static final Map<ilIllIiIll, Boolean> keyDown = new HashMap();
 
-   private static boolean ownsKeyAsSetting(ilIllIiIll m, int key) {
-      for(IilliIllilliIl var3 : m.IiIlliIliiIl()) {
-         if (var3 instanceof illlIlIlIillIlIl var4) {
-            if (var4.IIillIiliIil() && lIIlIIiliIIlIIil.IliIlllilIi(key, var4.Ililllililil())) {
+   private static boolean ownsKeyAsSetting(IIIIli m, int key) {
+      for (IIIliiIi var3 : m.IIli()) {
+         if (var3 instanceof IIIlIiIIi var4) {
+            if (var4.IIIII() && IIllIIill.III(key, var4.IIIIl())) {
                return true;
             }
          }
@@ -77,151 +75,150 @@ public class CorzClient implements ClientModInitializer {
       return false;
    }
 
-   private static boolean bindDown(class_1041 window, int code) {
-      if (code < 0) {
+   public static IIIiilIlI fontRenderer() {
+      return fontManager.IIIl();
+   }
+
+   private static boolean bindDown(class_1041 code, int window) {
+      if (window < 0) {
          return false;
-      } else if (IlIiliIlllIiliIl.IliIlllilIi(code)) {
-         return MojoInputBridge.isMouseButtonDown(window, IlIiliIlllIiliIl.liiiIIllIl(code));
+      } else if (IIIiIIliI.III(window)) {
+         return MojoInputBridge.isMouseButtonDown(code, IIIiIIliI.IIl(window));
       } else {
-         return MojoInputBridge.isKeyDown(window, code);
+         return MojoInputBridge.isKeyDown(code, window);
       }
    }
 
-   public static IIliiIlllIliiIll fontRenderer() {
-      return fontManager.lIiiIiIlilli();
-   }
-
-   private static void pollContainerBind(class_1041 window, ilIllIiIll m) {
-      long var5 = -195423944033929327L;
-      long var7 = 3501788637691961361L;
-      var5 ^= ((long)m.IIIilIIiiIIi() << 32 ^ var5) & -1L << 32;
-      if ((int)(var5 >>> 32) >= 0 && !ownsKeyAsSetting(m, (int)(var5 >>> 32))) {
-         var5 ^= ((long)bindDown(window, (int)(var5 >>> 32)) ^ var5) & -1L >>> 32;
-         var7 ^= ((long)(Boolean)keyDown.getOrDefault(m, false) << 32 ^ var7) & -1L << 32;
-         keyDown.put(m, Boolean.valueOf((boolean)((int)var5)));
-         if (m.IliIlllilIi() || !ilIIlilIiIIlil.liiiIIllIl(m) || ilIIlilIiIIlil.IIillIiliIil(m)) {
-            if (m.IiIiliIiiiIi() == ilIlIliIiIlIli.llilIIIIIl) {
+   private static void pollContainerBind(class_1041 m, IIIIli window) {
+      long var5 = 9026980723302747695L;
+      long var7 = 1207295393866013943L;
+      var5 ^= ((long)window.IIIlI() << 32 ^ var5) & -1L << 32;
+      if ((int)(var5 >>> 32) >= 0 && !ownsKeyAsSetting(window, (int)(var5 >>> 32))) {
+         var5 ^= ((long)(bindDown(m, (int)(var5 >>> 32)) ? 1 : 0) ^ var5) & -1L >>> 32;
+         var7 ^= ((long)(keyDown.getOrDefault(window, false) ? 1 : 0) << 32 ^ var7) & -1L << 32;
+         keyDown.put(window, (int)var5 != 0);
+         if (window.III() || !IIlllIii.IIl(window) || IIlllIii.IIIII(window)) {
+            if (window.IIIli() == IIilllll.IIIIIlIIili) {
                if ((int)var5 != 0 && (int)(var7 >>> 32) == 0) {
-                  m.IIillIiliIil(true);
+                  window.IIIII(true);
                } else if ((int)var5 == 0 && (int)(var7 >>> 32) != 0) {
-                  m.IIillIiliIil(false);
+                  window.IIIII(false);
                }
             } else if ((int)var5 != 0 && (int)(var7 >>> 32) == 0) {
-               m.Ililllililil();
+               window.IIIIl();
             }
-
          }
       } else {
-         keyDown.put(m, false);
+         keyDown.put(window, false);
       }
    }
 
+   @Override
    public void onInitializeClient() {
       AndroidRuntimeEnv.ensureAndroidHeadlessAwtIfNeeded();
-      iiIliiIIllii.iIlIlllllill();
-      IIIIIllllIIIIlll.liiiIIllIl();
-      lIiilIIliIiilIIl.iIlIlllllill();
-      fontManager = new llillililillil();
-      llilIllililIll.IliIlllilIi();
-      iiIiliIIlili.IliIlllilIi();
-      ClientLifecycleEvents.CLIENT_STOPPING.register((ClientLifecycleEvents.ClientStopping)(client) -> iiIiliIIlili.lIiiIiIlilli());
-      ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(client, handler) -> illIlIilIl.liiiIIllIl());
+      IIIIIllI.IIi();
+      IIIiillll.IIl();
+      IIIIiiIil.IIi();
+      fontManager = new IIlliIil();
+      IIIilliI.III();
+      IIiilIl.III();
+      ClientLifecycleEvents.CLIENT_STOPPING.register((ClientLifecycleEvents.ClientStopping)(client) -> IIiilIl.IIIl());
+      ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(client, handler) -> IIilI.IIl());
       ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(handler, client) -> {
-         ilIllIiIll var3 = llilIllililIll.iliIiiliiiii(iIlIilIlIllIilIl.class);
-         if (var3 instanceof iIlIilIlIllIilIl var2) {
-            var2.lIIIiIlliIIIiIll();
+         IIIIli var3 = IIIilliI.IIIi(IIIlllill.class);
+         if (var3 instanceof IIIlllill var2) {
+            var2.IIIliiIii();
          }
-
       });
-      ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(handler, client) -> {
-         IIIiillllIIiilll.lIiiIiIlilli();
-         illIllilIilIllil.IilliliilIIi();
-         IIllIIlilIllIIli.IllIllllIl();
-         iIIiIlIiIlIiIlIi.Iilllilliill();
+      ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayConnectionEvents.Disconnect)(client, handler) -> {
+         IIlIlIIIi.IIIl();
+         IIllillli.IIII();
+         IIilliIil.IIiII();
+         IIiIllIil.IIii();
       });
-      Iiliillliliill.IliIlllilIi();
-      WorldRenderEvents.END_EXTRACTION.register((WorldRenderEvents.EndExtraction)(context) -> iliiiiiIiiiiii.IliIlllilIi(context.frustum()));
+      IIlIiIil.III();
+      WorldRenderEvents.END_EXTRACTION.register((WorldRenderEvents.EndExtraction)(context) -> IIIIllilI.III(context.frustum()));
       WorldRenderEvents.AFTER_ENTITIES.register((WorldRenderEvents.AfterEntities)(context) -> {
-         if (!IIiIIllIiIIl.IliIlllilIi()) {
+         if (!IIIIlii.III()) {
             class_310 var1 = class_310.method_1551();
             if (var1.field_1687 != null && var1.field_1724 != null) {
                float var2 = var1.method_61966().method_60637(false);
-               illlllIillll var3 = new illlllIillll(context.matrices(), new Matrix4f(), var2);
-               var3.IIIIIlIilIIIIlIi = context.commandQueue();
-               llilIllililIll.IIIllIIliIIl(var3);
-               iIiiIIilIliiIIil.IiIiliIiiiIi();
+               IIIiill var3 = new IIIiill(context.matrices(), new Matrix4f(), var2);
+               var3.IIliIliII = context.commandQueue();
+               IIIilliI.IIlI(var3);
+               IIllIlili.IIIil();
             }
          }
       });
-      ScreenEvents.AFTER_INIT.register((ScreenEvents.AfterInit)(screen, client, scaledWidth, scaledHeight) -> {
-         if (client instanceof class_480 var4) {
-            iIliiIllii var5 = (iIliiIllii)llilIllililIll.iliIiiliiiii(iIliiIllii.class);
+      ScreenEvents.AFTER_INIT.register((ScreenEvents.AfterInit)(client, screen, scaledWidth, scaledHeight) -> {
+         if (screen instanceof class_480 var4) {
+            IIiili var5 = (IIiili)IIIilliI.IIIi(IIiili.class);
             if (var5 != null) {
-               llIiiIIlilIiiIIl var6 = new llIiiIIlilIiiIIl(var4, var5);
-               ScreenEvents.afterRender(client).register((ScreenEvents.AfterRender)(mx, my, ctx, s, panel) -> var6.IIillIiliIil(my, ctx, s));
-               ScreenMouseEvents.allowMouseClick(client).register((ScreenMouseEvents.AllowMouseClick)(s, panel) -> !var6.IiIiliIiiiIi(panel.comp_4798(), panel.comp_4799(), panel.method_74245()));
+               IIIlIIiII var6 = new IIIlIIiII(var4, var5);
+               ScreenEvents.afterRender(screen).register((ScreenEvents.AfterRender)(mx, td, s, my, ctx) -> var6.IIIII(td, s, my));
+               ScreenMouseEvents.allowMouseClick(screen).register((ScreenMouseEvents.AllowMouseClick)(s, panel) -> !var6.IIIli(panel.comp_4798(), panel.comp_4799(), panel.method_74245()));
             }
          }
       });
       ClientTickEvents.END_CLIENT_TICK.register((ClientTickEvents.EndTick)(client) -> {
-         long var8 = -2351136773380957812L;
-         long var10 = 1733234760780060303L;
-         long var12 = 4207528220103663858L;
-         if (!IIiIIllIiIIl.IliIlllilIi()) {
-            llilIllililIll.iIlIlllllill();
-            iiiIIIlIIIlIIl.iIlIlllllill();
-            IliiIIIilliiIIIi var1 = (IliiIIIilliiIIIi)llilIllililIll.iliIiiliiiii(IliiIIIilliiIIIi.class);
+         long var8 = 6095126464138896770L;
+         long var10 = -3845172132902994995L;
+         long var12 = -7558568501249690783L;
+         if (!IIIIlii.III()) {
+            IIIilliI.IIi();
+            IIIIlili.IIi();
+            IIliiilli var1 = (IIliiilli)IIIilliI.IIIi(IIliiilli.class);
             if (var1 != null && client.field_1755 == null && client.field_1724 != null) {
-               var8 ^= ((long)var1.IIIilIIiiIIi() << 32 ^ var8) & -1L << 32;
+               var8 ^= ((long)var1.IIIlI() << 32 ^ var8) & -1L << 32;
                if ((int)(var8 >>> 32) >= 0) {
                   class_1041 var3 = client.method_22683();
-                  var8 ^= ((long)bindDown(var3, (int)(var8 >>> 32)) ^ var8) & -1L >>> 32;
+                  var8 ^= ((long)(bindDown(var3, (int)(var8 >>> 32)) ? 1 : 0) ^ var8) & -1L >>> 32;
                   if ((int)var8 != 0 && !guiKeyWasPressed) {
                      var10 ^= ((long)(!MojoInputBridge.isKeyDown(var3, 341) && !MojoInputBridge.isKeyDown(var3, 345) ? 0 : 1) << 32 ^ var10) & -1L << 32;
-                     if (IIIIIllllIIIIlll.IiIlliIliiIl()) {
-                        client.method_1507(new lillliiliillliil());
+                     if (IIIiillll.IIli()) {
+                        client.method_1507(new IIlillIIi());
                      } else {
-                        client.method_1507(new IIIiiiIllIIiiiIl((class_437)null, true));
+                        client.method_1507(new IIIiIiIli((class_437)null, true));
                      }
                   }
 
-                  guiKeyWasPressed = (boolean)((int)var8);
+                  guiKeyWasPressed = (int)var8 != 0;
                }
             }
 
             if (client.field_1755 == null) {
                class_1041 var2 = client.method_22683();
 
-               for(ilIllIiIll var4 : IIIiliIilIIiliIi.IliIlllilIi().IilliliilIIi()) {
-                  if (!(var4 instanceof IliiIIIilliiIIIi)) {
-                     var10 ^= ((long)var4.IIIilIIiiIIi() << 32 ^ var10) & -1L << 32;
+               for (IIIIli var4 : IIilIiIlI.III().IIII()) {
+                  if (!(var4 instanceof IIliiilli)) {
+                     var10 ^= ((long)var4.IIIlI() << 32 ^ var10) & -1L << 32;
                      if (((int)(var10 >>> 32) < 0 || !ownsKeyAsSetting(var4, (int)(var10 >>> 32))) && (int)(var10 >>> 32) >= 0) {
-                        var10 ^= ((long)bindDown(var2, (int)(var10 >>> 32)) ^ var10) & -1L >>> 32;
-                        var12 ^= ((long)(Boolean)keyDown.getOrDefault(var4, false) << 32 ^ var12) & -1L << 32;
-                        keyDown.put(var4, Boolean.valueOf((boolean)((int)var10)));
-                        if ((int)var10 != 0 && (int)(var12 >>> 32) == 0 && !var4.IliIlllilIi() && ilIIlilIiIIlil.liiiIIllIl(var4) && !ilIIlilIiIIlil.IIillIiliIil(var4) && IIIIIllllIIIIlll.IiIlliIliiIl()) {
-                           client.method_1507(new lillliiliillliil(var4));
-                        } else if (var4.IiIiliIiiiIi() == ilIlIliIiIlIli.llilIIIIIl) {
+                        var10 ^= ((long)(bindDown(var2, (int)(var10 >>> 32)) ? 1 : 0) ^ var10) & -1L >>> 32;
+                        var12 ^= ((long)(keyDown.getOrDefault(var4, false) ? 1 : 0) << 32 ^ var12) & -1L << 32;
+                        keyDown.put(var4, (int)var10 != 0);
+                        if ((int)var10 != 0 && (int)(var12 >>> 32) == 0 && !var4.III() && IIlllIii.IIl(var4) && !IIlllIii.IIIII(var4) && IIIiillll.IIli()) {
+                           client.method_1507(new IIlillIIi(var4));
+                        } else if (var4.IIIli() == IIilllll.IIIIIlIIili) {
                            if ((int)var10 != 0 && (int)(var12 >>> 32) == 0) {
-                              var4.IIillIiliIil(true);
+                              var4.IIIII(true);
                            } else if ((int)var10 == 0 && (int)(var12 >>> 32) != 0) {
-                              var4.IIillIiliIil(false);
+                              var4.IIIII(false);
                            }
                         } else if ((int)var10 != 0 && (int)(var12 >>> 32) == 0) {
-                           var4.Ililllililil();
+                           var4.IIIIl();
                         }
                      }
                   }
                }
             } else {
-               var8 ^= ((long)(client.field_1755 instanceof class_476) << 32 ^ var8) & -1L << 32;
+               var8 ^= ((long)(client.field_1755 instanceof class_476 ? 1 : 0) << 32 ^ var8) & -1L << 32;
 
-               for(ilIllIiIll var16 : IIIiliIilIIiliIi.IliIlllilIi().IilliliilIIi()) {
-                  if ((int)(var8 >>> 32) != 0 && var16.IIlilIliiIli()) {
+               for (IIIIli var16 : IIilIiIlI.III().IIII()) {
+                  if ((int)(var8 >>> 32) != 0 && var16.IIIiI()) {
                      pollContainerBind(client.method_22683(), var16);
                   } else {
-                     if (var16.IiIiliIiiiIi() == ilIlIliIiIlIli.llilIIIIIl && var16.IliIlllilIi()) {
-                        var16.IIillIiliIil(false);
+                     if (var16.IIIli() == IIilllll.IIIIIlIIili && var16.III()) {
+                        var16.IIIII(false);
                      }
 
                      keyDown.put(var16, false);
@@ -230,42 +227,39 @@ public class CorzClient implements ClientModInitializer {
 
                guiKeyWasPressed = false;
             }
-
          }
       });
       HudRenderCallback.EVENT.register((HudRenderCallback)(tick, ctx) -> {
-         long var7 = -2397383752126859562L;
-         if (!IIiIIllIiIIl.IliIlllilIi()) {
-            IlIIiillIIii.IliIlllilIi();
-            if (IlIIilIlllIIilIl.liiiIIllIl()) {
-               IlIIilIlllIIilIl.IilliliilIIi();
+         long var7 = 7285294444275662907L;
+         if (!IIIIlii.III()) {
+            IIiiill.III();
+            if (IIIllllii.IIl()) {
+               IIIllllii.IIII();
             }
 
             class_310 var2 = class_310.method_1551();
-            fontManager.iIlIlllllill((class_4587)null);
-            IliiIilliiIi.iiIIlIIlIl();
+            fontManager.IIi((class_4587)null);
+            IIilIIi.IIlil();
 
             try {
-               var7 ^= ((long)IIililillIililil.liIlliiIll() << 32 ^ var7) & -1L << 32;
+               var7 ^= ((long)(IIliIIiii.IIIIIi() ? 1 : 0) << 32 ^ var7) & -1L << 32;
                if ((int)(var7 >>> 32) == 0) {
-                  Iliiiiilliiiii.IliIlllilIi().IilliliilIIi(tick);
+                  IIIIlliIi.III().IIII(tick);
                }
 
-               ilIllIiIll var5 = llilIllililIll.iliIiiliiiii(IIililillIililil.class);
-               if (var5 instanceof IIililillIililil) {
-                  IIililillIililil var4 = (IIililillIililil)var5;
-                  var4.liilliiill(tick);
+               IIIIli var5 = IIIilliI.IIIi(IIliIIiii.class);
+               if (var5 instanceof IIliIIiii var4) {
+                  var4.IIIlIi(tick);
                }
 
                if ((int)(var7 >>> 32) != 0) {
-                  Iliiiiilliiiii.IliIlllilIi().IilliliilIIi(tick);
+                  IIIIlliIi.III().IIII(tick);
                }
 
-               iiillilIIIilil.IIlllIlliIll(tick);
+               IIllilII.IIiI(tick);
             } finally {
-               IliiIilliiIi.lIlIliIlIl();
+               IIilIIi.IIlii();
             }
-
          }
       });
    }

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "corzclient",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "name": "Dispute Client",
-  "description": "Dispute Client — a high-performance utility client and autonomous AI bot suite for Minecraft 1.21.11 (Android ARM64 & PC).",
+  "description": "Dispute Client — a pure-Java high-performance utility client and autonomous AI bot suite for Minecraft 1.21.11 (Android ARM64 Mojo Launcher & PC).",
   "authors": [
     "Dispute Team"
   ],
@@ -28,5 +28,13 @@
     "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
-  }
+  },
+  "assets": [
+    "corzclient"
+  ],
+  "jars": [
+    {
+      "file": "META-INF/jars/client-rpc-1.0.0-bundled.jar"
+    }
+  ]
 }

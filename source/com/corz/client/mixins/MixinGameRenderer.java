@@ -5,16 +5,16 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import gg.corz.IIiIiIIllIiIiIIl;
-import gg.corz.IiilIIiliilIIi;
-import gg.corz.iIIlIllIlIlIll;
-import gg.corz.iIiliIiIliliIi;
-import gg.corz.iIlilIlIllilIl;
-import gg.corz.ilIllIiIll;
-import gg.corz.iliIliIlIiiIliIl;
-import gg.corz.lIllIiiIllIi;
-import gg.corz.lilIliIiiilIliIi;
-import gg.corz.llilIllililIll;
+import gg.corz.IIIIiiilI;
+import gg.corz.IIIIli;
+import gg.corz.IIIilIlI;
+import gg.corz.IIIilliI;
+import gg.corz.IIIliiili;
+import gg.corz.IIIlliII;
+import gg.corz.IIiIIIi;
+import gg.corz.IIiIiiiI;
+import gg.corz.IIilIllIl;
+import gg.corz.IIliiiIl;
 import net.minecraft.class_11228;
 import net.minecraft.class_11286;
 import net.minecraft.class_4184;
@@ -49,15 +49,15 @@ public abstract class MixinGameRenderer {
    @ModifyExpressionValue(
       method = {"method_3172(FZLorg/joml/Matrix4f;)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_5498;method_31034()Z"
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_5498;method_31034()Z"
+      )}
    )
    private boolean corzFreecamHands(boolean isFirstPerson) {
-      if (lilIliIiiilIliIi.iiiIlIIIll()) {
-         return lilIliIiiilIliIi.IlIllllIll();
+      if (IIilIllIl.IIiil()) {
+         return IIilIllIl.IIIIII();
       } else {
-         return iIIlIllIlIlIll.IIIllIIliIIl() ? false : isFirstPerson;
+         return IIIilIlI.IIlI() ? false : isFirstPerson;
       }
    }
 
@@ -67,29 +67,29 @@ public abstract class MixinGameRenderer {
    )
    private void corz$gui3dFrame(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
       MojoBlurCoordinator.beginFrame();
-      IIiIiIIllIiIiIIl.IliIlllilIi();
-      iIIlIllIlIlIll.IiiIlliiIl();
+      IIIIiiilI.III();
+      IIIilIlI.IIiiI();
    }
 
    @Inject(
       method = {"method_3192(Lnet/minecraft/class_9779;Z)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_437;method_47413(Lnet/minecraft/class_332;IIF)V"
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_437;method_47413(Lnet/minecraft/class_332;IIF)V"
+      )}
    )
    private void corz$gui3dBegin(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
-      if (iIIlIllIlIlIll.IIIIllIIIl()) {
+      if (IIIilIlI.IIllI()) {
          try {
             this.field_59965.method_70890(this.field_60793.method_71109(class_4596.field_60101));
          } catch (Throwable t) {
-            iIIlIllIlIlIll.iIIIlIlIIl(t);
+            IIIilIlI.IIlll(t);
          }
       }
 
       if (!MojoBlurCoordinator.isFallbackActive()) {
          try {
-            lIllIiiIllIi.iIlIlllllill();
+            IIiIIIi.IIi();
          } catch (Throwable t) {
             MojoBlurCoordinator.markBlurOrPostFailure(t);
          }
@@ -99,14 +99,14 @@ public abstract class MixinGameRenderer {
    @Inject(
       method = {"method_3192(Lnet/minecraft/class_9779;Z)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_11228;method_70890(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V",
-   shift = Shift.AFTER
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_11228;method_70890(Lcom/mojang/blaze3d/buffers/GpuBufferSlice;)V",
+         shift = Shift.AFTER
+      )}
    )
    private void corz$gui3dEnd(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
       try {
-         lIllIiiIllIi.IilliliilIIi();
+         IIiIIIi.IIII();
       } catch (Throwable t) {
          MojoBlurCoordinator.markBlurOrPostFailure(t);
       }
@@ -118,7 +118,7 @@ public abstract class MixinGameRenderer {
    )
    private void corz$gui3dLeave(class_9779 tickCounter, boolean tick, CallbackInfo ci) {
       try {
-         lIllIiiIllIi.lIiiIiIlilli();
+         IIiIIIi.IIIl();
       } catch (Throwable t) {
          MojoBlurCoordinator.markBlurOrPostFailure(t);
       }
@@ -127,27 +127,27 @@ public abstract class MixinGameRenderer {
    @Redirect(
       method = {"method_3188(Lnet/minecraft/class_9779;)V"},
       at = @At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_11286;method_71123(Lorg/joml/Matrix4f;)Lcom/mojang/blaze3d/buffers/GpuBufferSlice;"
-)
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_11286;method_71123(Lorg/joml/Matrix4f;)Lcom/mojang/blaze3d/buffers/GpuBufferSlice;"
+      )
    )
    private GpuBufferSlice corz_captureProjection(class_11286 instance, Matrix4f projection) {
-      iliIliIlIiiIliIl.lIiIIiiIll.set(projection);
+      IIIliiili.IIllIIIIlli.set(projection);
       return instance.method_71123(projection);
    }
 
    @Inject(
       method = {"method_3188(Lnet/minecraft/class_9779;)V"},
       at = {@At(
-   value = "INVOKE",
-   target = "Lnet/minecraft/class_3695;method_15405(Ljava/lang/String;)V",
-   ordinal = 1
-)}
+         value = "INVOKE",
+         target = "Lnet/minecraft/class_3695;method_15405(Ljava/lang/String;)V",
+         ordinal = 1
+      )}
    )
    private void onWorldRender(class_9779 rtc, CallbackInfo ci) {
-      class_4184 cam = ilIllIiIll.Iiiilllliiilll.field_1773.method_19418();
-      iliIliIlIiiIliIl.iIiIIiiIll.identity();
-      iliIliIlIiiIliIl.IliIIiiIll.set((new Matrix4f()).rotation(cam.method_23767().conjugate(new Quaternionf())));
+      class_4184 cam = IIIIli.IIIiIiII.field_1773.method_19418();
+      IIIliiili.IIllIIIIliI.identity();
+      IIIliiili.IIllIIIIlil.set((new Matrix4f()).rotation(cam.method_23767().conjugate(new Quaternionf())));
    }
 
    @ModifyReturnValue(
@@ -156,25 +156,25 @@ public abstract class MixinGameRenderer {
    )
    private float corz_customFovAndZoom(float original, @Local(argsOnly = true) boolean changingFov) {
       float result = original;
-      iIiliIiIliliIi customFov = (iIiliIiIliliIi)llilIllililIll.iliIiiliiiii(iIiliIiIliliIi.class);
-      if (customFov != null && customFov.IliIlllilIi()) {
-         result = customFov.iiiIlIIIll(original);
+      IIiIiiiI customFov = (IIiIiiiI)IIIilliI.IIIi(IIiIiiiI.class);
+      if (customFov != null && customFov.III()) {
+         result = customFov.IIiil(original);
       }
 
-      iIlilIlIllilIl zoom = (iIlilIlIllilIl)llilIllililIll.iliIiiliiiii(iIlilIlIllilIl.class);
+      IIIlliII zoom = (IIIlliII)IIIilliI.IIIi(IIIlliII.class);
       if (zoom != null) {
-         double factor = zoom.iiiIlIIIll();
-         if (factor > 1.0001) {
+         double factor = zoom.IIiil();
+         if (factor > 1.0001D) {
             result = (float)((double)result / factor);
          }
       }
 
-      if (changingFov && iIIlIllIlIlIll.IIIllIIliIIl()) {
-         result = iIIlIllIlIlIll.iIlllIllll(result);
+      if (changingFov && IIIilIlI.IIlI()) {
+         result = IIIilIlI.IIIIll(result);
       }
 
       if (changingFov) {
-         IiilIIiliilIIi.IliIlllilIi(result);
+         IIliiiIl.III(result);
       }
 
       return result;
@@ -186,9 +186,8 @@ public abstract class MixinGameRenderer {
       cancellable = true
    )
    private void onShouldRenderBlockOutline(CallbackInfoReturnable<Boolean> cir) {
-      if (lilIliIiiilIliIi.iiiIlIIIll() || iIIlIllIlIlIll.IIIllIIliIIl()) {
+      if (IIilIllIl.IIiil() || IIIilIlI.IIlI()) {
          cir.setReturnValue(false);
       }
-
    }
 }

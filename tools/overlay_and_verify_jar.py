@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """
-Builds the final Android/Mojo-ready CorzClient JAR by overlaying:
-  - ASM-patched gg/corz/* classes from upstream JAR
-  - Freshly compiled com/corz/client/{android,qvm,mixins,CorzClient} classes
-  - Audited GLSL 330/ES-safe shaders from source/assets/
-  - Android ARM64 NDK natives (libvm.so + libcorz_bionic_shim.so + optional libc++_shared.so)
+Builds the final Android ARM64 / Mojo Launcher-ready Dispute Client v2.0.3 JAR by overlaying:
+  - ASM-patched pure-Java gg/corz/*, corzbot/*, de/neo/uhcbot/*, com/corz/client/bot/* classes
+  - Freshly compiled com/corz/client/{android,qvm,mixins,CorzClient,LocalBranding} classes
+  - Updated 2.0.3 metadata (fabric.mod.json, corz-client.mixins.json, META-INF/corz-module-ids.properties)
+  - All 78 GLSL ES-safe shaders from source/assets/corzclient/shaders
+  - Bundled pure-Java RPC protobuf jar (libs/client-rpc-1.0.0-bundled.jar)
 and runs strict automated verification checks on the output JAR.
 """
 import argparse
 import json
-import os
 import re
-import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -27,14 +26,15 @@ def validate_glsl_bytes(name: str, text: str) -> list[str]:
         errs.append(f"{name}: contains unsized vec[] array constructor")
     if name.endswith("corz_msdf_text.fsh") and "inversesqrt(h.x" in text:
         errs.append(f"{name}: contains unguarded inversesqrt(h.x...)")
+    if name.endswith("corz_msdf_world.fsh") and "vec2 w = fwidth(" in text:
+        errs.append(f"{name}: contains unguarded fwidth() without max(..., 1.0e-6)")
     return errs
 
 
-def patch_fabric_mod_json(raw_bytes: bytes, has_rpc_jar: bool, extra_mixins: list[str]) -> bytes:
+def patch_fabric_mod_json(raw_bytes: bytes, has_rpc_jar: bool) -> bytes:
     meta = json.loads(raw_bytes.decode("utf-8"))
 
     entrypoints = meta.setdefault("entrypoints", {})
-    # Strip any malicious net.fabric.* entrypoint if ever present
     if "main" in entrypoints and isinstance(entrypoints["main"], list):
         clean_main = [e for e in entrypoints["main"] if not str(e).startswith("net.fabric.")]
         if clean_main:
@@ -42,17 +42,8 @@ def patch_fabric_mod_json(raw_bytes: bytes, has_rpc_jar: bool, extra_mixins: lis
         else:
             entrypoints.pop("main", None)
 
-    client_eps = list(entrypoints.get("client", []))
-    for ep in ("com.corz.client.CorzClient", "com.corz.client.bots.CorzBotsAddon"):
-        if ep not in client_eps:
-            client_eps.append(ep)
-    entrypoints["client"] = client_eps
-
-    mixins = list(meta.get("mixins", []))
-    for m in extra_mixins:
-        if m not in mixins:
-            mixins.append(m)
-    meta["mixins"] = mixins
+    entrypoints["client"] = ["com.corz.client.CorzClient"]
+    meta["mixins"] = ["corz-client.mixins.json"]
 
     if has_rpc_jar:
         jars = list(meta.get("jars", []))
@@ -61,8 +52,10 @@ def patch_fabric_mod_json(raw_bytes: bytes, has_rpc_jar: bool, extra_mixins: lis
             jars.append({"file": rpc_ref})
         meta["jars"] = jars
 
+    meta["id"] = "corzclient"
+    meta["version"] = "2.0.3"
     meta["name"] = "Dispute Client"
-    meta["description"] = "Dispute Client — a high-performance utility client and autonomous AI bot suite for Minecraft 1.21.11 (Android ARM64 & PC)."
+    meta["description"] = "Dispute Client — a pure-Java high-performance utility client and autonomous AI bot suite for Minecraft 1.21.11 (Android ARM64 Mojo Launcher & PC)."
     meta["authors"] = ["Dispute Team"]
     provides = list(meta.get("provides", []))
     for p in ("disputeclient", "corzclient"):
@@ -77,23 +70,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--asm-jar", required=True, help="ASM-patched upstream mod JAR")
     parser.add_argument("--compiled-classes", required=True, help="Directory with freshly compiled .class files")
-    parser.add_argument("--android-native-dir", required=True, help="Directory with android-aarch64 .so files")
     parser.add_argument("--shaders-dir", default="source/assets/corzclient/shaders", help="Fixed GLSL shaders directory")
     parser.add_argument("--rpc-jar", default="libs/client-rpc-1.0.0-bundled.jar", help="Bundled pure-Java RPC protobuf jar")
-    parser.add_argument(
-        "--mixin-configs",
-        nargs="*",
-        default=["source/corzbot.mixins.json", "source/corzbots-addon.mixins.json"],
-        help="Additional mixin JSON configs to include at JAR root",
-    )
-    parser.add_argument("--output-jar", required=True, help="Final output CorzClient Android JAR")
+    parser.add_argument("--source-dir", default="source", help="Source metadata/resources directory")
+    parser.add_argument("--output-jar", required=True, help="Final output Dispute Client Android JAR")
     parser.add_argument("--report", required=True, help="Verification report output path")
-    parser.add_argument("--readelf", default="readelf")
     args = parser.parse_args()
 
     compiled_root = Path(args.compiled_classes)
-    native_root = Path(args.android_native_dir)
     shaders_root = Path(args.shaders_dir)
+    source_root = Path(args.source_dir)
     rpc_jar_path = Path(args.rpc_jar) if args.rpc_jar else None
     out_jar = Path(args.output_jar)
     out_jar.parent.mkdir(parents=True, exist_ok=True)
@@ -101,44 +87,41 @@ def main():
     overlays: dict[str, Path] = {}
     byte_overlays: dict[str, bytes] = {}
 
-    for cls in compiled_root.rglob("*.class"):
+    for cls in sorted(compiled_root.rglob("*.class")):
         rel = cls.relative_to(compiled_root).as_posix()
-        if rel.startswith("net/fabric/"):
-            raise RuntimeError(f"Refusing to bundle disallowed net/fabric class: {rel}")
+        if rel.startswith("net/fabric/") or rel.startswith("gg/corz/injector/"):
+            raise RuntimeError(f"Refusing to bundle disallowed class: {rel}")
         overlays[rel] = cls
 
-    for sh in shaders_root.rglob("*"):
+    for sh in sorted(shaders_root.rglob("*")):
         if sh.is_file():
             rel = f"assets/corzclient/shaders/{sh.relative_to(shaders_root).as_posix()}"
             overlays[rel] = sh
 
-    for so_name in ("libcorz_bionic_shim.so", "libvm.so", "libc++_shared.so"):
-        so_path = native_root / so_name
-        if so_path.is_file():
-            overlays[f"native/android-aarch64/{so_name}"] = so_path
+    for meta_rel in ("corz-client.mixins.json", "META-INF/corz-module-ids.properties"):
+        mp = source_root / meta_rel
+        if mp.is_file():
+            overlays[meta_rel] = mp
 
     has_rpc_jar = bool(rpc_jar_path and rpc_jar_path.is_file())
     if has_rpc_jar:
         with zipfile.ZipFile(rpc_jar_path, "r") as zrpc:
-            bad_rpc = [n for n in zrpc.namelist() if n.startswith("net/fabric/")]
+            bad_rpc = [
+                n for n in zrpc.namelist()
+                if n.startswith("net/fabric/") or n.endswith(".dll") or n.endswith(".so")
+            ]
             if bad_rpc:
-                raise RuntimeError(f"RPC jar contains forbidden net/fabric entries: {bad_rpc}")
+                raise RuntimeError(f"RPC jar contains forbidden native/malware entries: {bad_rpc}")
         overlays["META-INF/jars/client-rpc-1.0.0-bundled.jar"] = rpc_jar_path
 
-    extra_mixin_names: list[str] = []
-    for m_str in args.mixin_configs:
-        mp = Path(m_str)
-        if mp.is_file():
-            overlays[mp.name] = mp
-            extra_mixin_names.append(mp.name)
+    fmod_source = source_root / "fabric.mod.json"
+    if fmod_source.is_file():
+        byte_overlays["fabric.mod.json"] = patch_fabric_mod_json(fmod_source.read_bytes(), has_rpc_jar)
+    else:
+        with zipfile.ZipFile(args.asm_jar, "r") as zin:
+            if "fabric.mod.json" in zin.namelist():
+                byte_overlays["fabric.mod.json"] = patch_fabric_mod_json(zin.read("fabric.mod.json"), has_rpc_jar)
 
-    with zipfile.ZipFile(args.asm_jar, "r") as zin:
-        if "fabric.mod.json" in zin.namelist():
-            byte_overlays["fabric.mod.json"] = patch_fabric_mod_json(
-                zin.read("fabric.mod.json"), has_rpc_jar, extra_mixin_names
-            )
-
-    # Remove old inner classes belonging to replaced top-level Java classes cleanly
     replaced_prefixes = tuple(
         k[:-6] + "$" for k in overlays if k.endswith(".class") and "$" not in k
     )
@@ -153,8 +136,15 @@ def main():
         written_names = set()
         for info in zin.infolist():
             name = info.filename
-            # Security & Android hygiene: strip any net/fabric malware or Windows vm.dll
-            if name.startswith("net/fabric/") or name.endswith("vm.dll"):
+            if not name or name.endswith("/"):
+                continue
+            if (
+                name.startswith("net/fabric/")
+                or name.startswith("gg/corz/injector/")
+                or name == "assets/wvbwipuv.cfg"
+                or name.endswith(".dll")
+                or name.endswith(".exe")
+            ):
                 continue
             if name.endswith(".class") and name.startswith(replaced_prefixes) and name not in overlays:
                 continue
@@ -165,7 +155,7 @@ def main():
                 zout.write(overlays[name], arcname=name)
                 overwritten += 1
             else:
-                zout.writestr(info, zin.read(name))
+                zout.writestr(name, zin.read(name))
             written_names.add(name)
             written += 1
 
@@ -179,27 +169,46 @@ def main():
                 zout.write(path, arcname=name)
                 added += 1
 
-    # Automated verification of the final artifact
     report_lines = [
-        "Final Output JAR Verification Report",
-        "====================================",
+        "Final Output JAR Verification Report (Dispute Client v2.0.3)",
+        "============================================================",
         f"Output JAR: {out_jar} ({out_jar.stat().st_size} bytes)",
         f"Base entries preserved/updated: {written}",
         f"Entries overwritten from compiled/fixed sources: {overwritten}",
-        f"New entries added (android compat/natives/bots): {added}",
+        f"New entries added: {added}",
     ]
 
     with zipfile.ZipFile(out_jar, "r") as zchk:
         names = set(zchk.namelist())
-        forbidden_entries = [n for n in names if n.startswith("net/fabric/") or n.endswith("vm.dll")]
+        forbidden_entries = [
+            n for n in names
+            if n.startswith("net/fabric/")
+            or n.startswith("gg/corz/injector/")
+            or n == "assets/wvbwipuv.cfg"
+            or n.endswith(".dll")
+            or n.endswith(".exe")
+            or n.endswith(".so")
+            or n.endswith(".dylib")
+        ]
         if forbidden_entries:
-            raise RuntimeError(f"Final JAR contains forbidden malware/Windows entries: {forbidden_entries}")
+            raise RuntimeError(f"Final JAR contains forbidden malware/native binary entries: {forbidden_entries}")
+
+        fmod = json.loads(zchk.read("fabric.mod.json").decode("utf-8"))
+        if fmod.get("version") != "2.0.3" or fmod.get("name") != "Dispute Client":
+            raise RuntimeError(f"Unexpected fabric.mod.json metadata: {fmod}")
+        fmod_text = json.dumps(fmod)
+        if "CorzClientCrackedBYM4" in fmod_text or "net.fabric." in fmod_text:
+            raise RuntimeError("fabric.mod.json still contains banned crack/malware identifiers!")
+
+        mixins_cfg = json.loads(zchk.read("corz-client.mixins.json").decode("utf-8"))
+        if "MixinGameMenuScreenDispute" not in mixins_cfg.get("client", []):
+            raise RuntimeError("corz-client.mixins.json missing MixinGameMenuScreenDispute")
 
         required_entries = [
             "fabric.mod.json",
             "corz-client.mixins.json",
-            "corzbot.mixins.json",
-            "corzbots-addon.mixins.json",
+            "META-INF/corz-module-ids.properties",
+            "META-INF/jars/client-rpc-1.0.0-bundled.jar",
             "com/corz/client/CorzClient.class",
             "com/corz/client/LocalBranding.class",
             "com/corz/client/LocalCombat.class",
@@ -210,18 +219,20 @@ def main():
             "com/corz/client/android/MojoBlurCoordinator.class",
             "com/corz/client/android/AndroidFilePicker.class",
             "com/corz/client/android/CompatFileDialog.class",
-            "com/corz/client/bots/CorzBotsAddon.class",
-            "com/corz/client/bots/CorzBotsScreen.class",
-            "com/corz/client/bots/MaceSpearBot.class",
-            "com/corz/client/bots/TreeFarmerBot.class",
-            "com/corz/client/bots/AutoOreMinerBot.class",
+            "com/corz/client/mixins/MixinWindow.class",
+            "com/corz/client/mixins/MixinMouse.class",
+            "com/corz/client/mixins/MixinKeyboard.class",
+            "com/corz/client/mixins/MixinGameRenderer.class",
+            "com/corz/client/mixins/MixinGameRendererMotionBlur.class",
+            "com/corz/client/mixins/MixinHeldItemRenderer.class",
+            "com/corz/client/mixins/MixinGameMenuScreenDispute.class",
             "corzbot/CorzBot.class",
             "de/neo/uhcbot/UhcBotMod.class",
             "de/neo/uhcbot/Fighter.class",
-            "META-INF/jars/client-rpc-1.0.0-bundled.jar",
-            "gg/corz/iiIliiIIllii.class",
-            "native/android-aarch64/libcorz_bionic_shim.so",
-            "native/android-aarch64/libvm.so",
+            "gg/corz/IIIIli.class",
+            "gg/corz/IIIilliI.class",
+            "gg/corz/IIIiillll.class",
+            "gg/corz/IIlillIIi.class",
         ]
         missing_req = [r for r in required_entries if r not in names]
         if missing_req:
@@ -240,19 +251,10 @@ def main():
         if shader_errors:
             raise RuntimeError("Shader validation failed:\n" + "\n".join(shader_errors))
 
-        report_lines.append(f"Required core/android/QVM/native/bot entries: ALL {len(required_entries)} PRESENT")
-        report_lines.append("Security check: ZERO net/fabric malware or vm.dll entries")
+        report_lines.append(f"Required core/android/QVM-free/bot entries: ALL {len(required_entries)} PRESENT")
+        report_lines.append("Security & native audit: ZERO net/fabric/* malware, ZERO injector/*, ZERO vm.dll / .so binaries")
         report_lines.append(f"GLSL shaders validated inside JAR: {shader_count} (0 issues)")
-
-    # Verify patched ELF inside android-native dir has zero glibc DT_NEEDED
-    readelf_out = subprocess.check_output(
-        [args.readelf, "-d", str(native_root / "libvm.so")], text=True
-    )
-    forbidden = ("libm.so.6", "libc.so.6", "libdl.so.2", "libpthread.so.0", "librt.so.1", "libstdc++.so.6")
-    for bad in forbidden:
-        if bad in readelf_out:
-            raise RuntimeError(f"Patched android-aarch64/libvm.so still references glibc library {bad}!")
-    report_lines.append("Patched libvm.so DT_NEEDED audit: ZERO glibc sonames remaining")
+        report_lines.append("Branding & metadata: Dispute Client v2.0.3 verified")
 
     Path(args.report).parent.mkdir(parents=True, exist_ok=True)
     Path(args.report).write_text("\n".join(report_lines) + "\n")

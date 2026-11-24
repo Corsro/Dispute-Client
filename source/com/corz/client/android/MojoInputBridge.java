@@ -178,6 +178,17 @@ public final class MojoInputBridge {
    }
 
    /**
+    * Drop-in ASM replacement target for org.lwjgl.glfw.GLFW.glfwGetKeyScancode(I)I.
+    */
+   public static int glfwGetKeyScancodeCompat(int key) {
+      try {
+         return GLFW.glfwGetKeyScancode(key);
+      } catch (Throwable ignored) {
+         return 0;
+      }
+   }
+
+   /**
     * Ensures Corz ClickGUI remains readable and touch-interactive on high-DPI Android screens
     * (e.g., 2400x1080 or 1280x720 scaled render targets inside Mojo Launcher).
     */
