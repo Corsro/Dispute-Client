@@ -1,0 +1,13 @@
+{
+  "name": "corzclient-android-mojo-port",
+  "version": "2.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "node --check server.mjs && node --check lib/port_catalog.mjs",
+    "start": "node server.mjs",
+    "lint": "node --check server.mjs && node --check lib/port_catalog.mjs && node --check lib/port_catalog.test.mjs",
+    "test": "node --test lib/port_catalog.test.mjs"
+  }
+}
