@@ -108,11 +108,11 @@ jobs:
               source/com/corz/client/mixins/MixinGameRenderer.java \
               source/com/corz/client/mixins/MixinGameRendererMotionBlur.java \
               source/com/corz/client/mixins/MixinHeldItemRenderer.java
-            find source/com/corz/client/bots source/corzbot source/de/neo/uhcbot -name '*.java' | sort
+            find source/com/corz/client/bots source/corzbot source/de/neo/uhcbot source/gg/corz/rpc -name '*.java' | sort
           } > build/compile-sources/sources.txt
           echo "Compiling $(wc -l < build/compile-sources/sources.txt) modified/new Java files against intermediary MC 1.21.11 + upstream gg.corz + client-rpc..."
 
-          javac --release 21 -encoding UTF-8 -Xlint:none -cp "$FULL_CP" -d build/mod-classes @build/compile-sources/sources.txt
+          javac --release 21 -encoding UTF-8 -Xlint:none -proc:none -cp "$FULL_CP" -d build/mod-classes @build/compile-sources/sources.txt
 
       - name: Assemble & verify final DisputeClient-2.0.1-Android-Mojo JAR
         run: |
