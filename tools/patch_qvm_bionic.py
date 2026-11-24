@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Patches a glibc-linked ARM64 Linux shared library (libvm.so) for native execution
-under Android 14+ Bionic linker (Mojo Launcher clns namespace), and audits every
-undefined dynamic symbol against Android NDK Bionic stubs + libcorz_bionic_shim.so.
+under Android 14+ Bionic linker (Mojo Launcher clns namespace) entirely in pure Python,
+bypassing patchelf limitations on stripped or version-section-less binaries.
 """
 import argparse
 import os
@@ -19,7 +19,6 @@ PT_DYNAMIC = 2
 DT_NULL = 0
 DT_RPATH = 15
 DT_RUNPATH = 29
-DT_FLAGS_1 = 0x6FFFFFFB
 DT_VERSYM = 0x6FFFFFF0
 DT_VERNEED = 0x6FFFFFFE
 DT_VERNEEDNUM = 0x6FFFFFFF
@@ -65,9 +64,11 @@ def read_cstr(data, offset):
 
 def patch_elf64_dynamic_for_bionic(elf_path, first_needed="libcorz_bionic_shim.so"):
     """
-    1) Neutralize DT_VERNEED / DT_VERNEEDNUM / DT_VERSYM dynamic tags and GNU_versym / GNU_verneed sections.
-    2) Move `first_needed` (libcorz_bionic_shim.so) to the FIRST DT_NEEDED slot so shim overrides (dlopen,
-       __assert_fail, etc.) resolve before libdl.so / libc.so inside Bionic's clns linker namespace.
+    Pure Python ELF64 dynamic section patcher:
+      1) Rewrites DT_NEEDED entries according to NEEDED_REWRITES in-place in strtab.
+      2) Ensures `first_needed` (libcorz_bionic_shim.so) is added and placed FIRST in DT_NEEDED.
+      3) Sets DT_RUNPATH to '$ORIGIN'.
+      4) Neutralizes DT_VERSYM / DT_VERNEED / DT_VERNEEDNUM tags and version sections.
     """
     with open(elf_path, "rb") as f:
         data = bytearray(f.read())
@@ -107,44 +108,118 @@ def patch_elf64_dynamic_for_bionic(elf_path, first_needed="libcorz_bionic_shim.s
 
     strtab_off = vaddr_to_offset(load_segments, strtab_vaddr) if strtab_vaddr is not None else None
 
+    # 1. Process and rewrite DT_NEEDED entries
     needed_entries = []
     other_entries = []
     removed_tags = []
+
+    shim_str_off = None
+    if strtab_off is not None:
+        # Check if first_needed string already exists in strtab
+        search_pos = strtab_off
+        strtab_end = data.find(b"\x00\x00", strtab_off)
+        if strtab_end == -1:
+            strtab_end = strtab_off + 1024
+        while search_pos < strtab_end:
+            s = read_cstr(data, search_pos)
+            if not s:
+                search_pos += 1
+                continue
+            if s == first_needed:
+                shim_str_off = search_pos - strtab_off
+                break
+            search_pos += len(s) + 1
+
+        # If shim string not found, append it to strtab if space permits
+        if shim_str_off is None:
+            # Find free space at the end of strtab
+            free_pos = strtab_off
+            while free_pos < len(data) and data[free_pos] != 0:
+                free_pos += 1
+            # If we have space, write shim string
+            shim_bytes = first_needed.encode("utf-8") + b"\x00"
+            if free_pos + len(shim_bytes) <= len(data):
+                data[free_pos : free_pos + len(shim_bytes)] = shim_bytes
+                shim_str_off = free_pos - strtab_off
+
     for d_tag, d_val in raw_entries:
         if d_tag in (DT_VERSYM, DT_VERNEED, DT_VERNEEDNUM):
             removed_tags.append(hex(d_tag))
             continue
         if d_tag == DT_NEEDED:
+            if strtab_off is not None:
+                lib_name = read_cstr(data, strtab_off + d_val)
+                mapped = NEEDED_REWRITES.get(lib_name, lib_name)
+                if mapped is None:
+                    continue  # Drop library
+                if mapped != lib_name:
+                    # In-place overwrite in strtab (mapped names are shorter or equal)
+                    encoded = mapped.encode("utf-8") + b"\x00"
+                    data[strtab_off + d_val : strtab_off + d_val + len(encoded)] = encoded
             needed_entries.append((d_tag, d_val))
+        elif d_tag in (DT_RPATH, DT_RUNPATH):
+            # We will add $ORIGIN runpath later
+            continue
         else:
             other_entries.append((d_tag, d_val))
 
-    if strtab_off is not None:
+    # Ensure first_needed is in needed_entries as the FIRST item
+    has_shim = False
+    for item in needed_entries:
+        if strtab_off is not None and read_cstr(data, strtab_off + item[1]) == first_needed:
+            has_shim = True
+            break
+    if not has_shim and shim_str_off is not None:
+        needed_entries.insert(0, (DT_NEEDED, shim_str_off))
+    elif strtab_off is not None:
         needed_entries.sort(
             key=lambda item: 0 if read_cstr(data, strtab_off + item[1]) == first_needed else 1
         )
 
+    # Add $ORIGIN runpath if strtab has room or if we have rpath space
+    # (or we can add DT_RUNPATH if there's an available slot or replacing another tag)
+    # Actually, let's add DT_RUNPATH if strtab has "$ORIGIN"
+    origin_str_off = None
+    if strtab_off is not None:
+        origin_bytes = b"$ORIGIN\x00"
+        # Search for $ORIGIN or find free space
+        free_pos = strtab_off
+        while free_pos < len(data) and data[free_pos] != 0:
+            free_pos += 1
+        if free_pos + len(origin_bytes) <= len(data):
+            data[free_pos : free_pos + len(origin_bytes)] = origin_bytes
+            origin_str_off = free_pos - strtab_off
+
+    if origin_str_off is not None:
+        other_entries.append((DT_RUNPATH, origin_str_off))
+
     kept_entries = needed_entries + other_entries
     write_pos = dyn_off
     for d_tag, d_val in kept_entries:
+        if write_pos + 16 > dyn_off + dyn_size:
+            break
         struct.pack_into("<qQ", data, write_pos, d_tag, d_val)
         write_pos += 16
-    while write_pos + 16 <= end:
+    while write_pos + 16 <= dyn_off + dyn_size:
         struct.pack_into("<qQ", data, write_pos, DT_NULL, 0)
         write_pos += 16
 
+    # Neutralize section headers for versioning if present
     if e_shoff != 0 and e_shnum > 0:
         SHT_GNU_VERSYM = 0x6FFFFFFF
         SHT_GNU_VERNEED = 0x6FFFFFFE
         SHT_NULL = 0
         for i in range(e_shnum):
             sh_off = e_shoff + i * e_shentsize
+            if sh_off + 40 > len(data):
+                break
             sh_name, sh_type, sh_flags, sh_addr, sh_offset, sh_size, sh_link, sh_info, sh_addralign, sh_entsize = struct.unpack_from("<IIQQQQIIQQ", data, sh_off)
             if sh_type == SHT_GNU_VERSYM:
-                for k in range(0, sh_size, 2):
-                    val = struct.unpack_from("<H", data, sh_offset + k)[0]
-                    if val > 1:
-                        struct.pack_into("<H", data, sh_offset + k, 1)
+                if sh_offset + sh_size <= len(data):
+                    for k in range(0, sh_size, 2):
+                        val = struct.unpack_from("<H", data, sh_offset + k)[0]
+                        if val > 1:
+                            struct.pack_into("<H", data, sh_offset + k, 1)
                 struct.pack_into("<I", data, sh_off + 4, SHT_NULL)
                 struct.pack_into("<II", data, sh_off + 40, 0, 0)
             elif sh_type == SHT_GNU_VERNEED:
@@ -153,7 +228,7 @@ def patch_elf64_dynamic_for_bionic(elf_path, first_needed="libcorz_bionic_shim.s
 
     with open(elf_path, "wb") as f:
         f.write(data)
-    print(f"Stripped GNU symbol versioning tags & prioritized {first_needed} in {elf_path}: {removed_tags}")
+    print(f"Successfully patched ELF dynamic table for Bionic in {elf_path} (prioritized {first_needed})")
 
 def parse_undefined_symbols(nm_bin, elf_path):
     out = run([nm_bin, "-D", "-u", elf_path])
@@ -201,21 +276,7 @@ def main():
     needed_before = get_dynamic_needed(args.readelf, args.output)
     print("DT_NEEDED before:", needed_before)
 
-    present_needed = set(needed_before)
-    needs_libcxx = "libstdc++.so.6" in present_needed or "libc++_shared.so" in present_needed
-    for old_lib, new_lib in NEEDED_REWRITES.items():
-        if old_lib in present_needed:
-            if new_lib not in present_needed:
-                run([args.patchelf, "--replace-needed", old_lib, new_lib, args.output])
-                present_needed.add(new_lib)
-            else:
-                run([args.patchelf, "--remove-needed", old_lib, args.output])
-            present_needed.discard(old_lib)
-
-    if "libcorz_bionic_shim.so" not in present_needed:
-        run([args.patchelf, "--add-needed", "libcorz_bionic_shim.so", args.output])
-
-    run([args.patchelf, "--set-rpath", "$ORIGIN", args.output])
+    # Perform all dynamic section patches in pure Python (no external patchelf dependency required)
     patch_elf64_dynamic_for_bionic(args.output, first_needed="libcorz_bionic_shim.so")
 
     needed_after = get_dynamic_needed(args.readelf, args.output)
@@ -228,6 +289,7 @@ def main():
         os.path.join(args.ndk_sysroot_lib, "libm.so"),
         os.path.join(args.ndk_sysroot_lib, "libdl.so"),
     ]
+    needs_libcxx = any("libc++" in l or "libstdc++" in l for l in needed_after)
     if needs_libcxx and args.libcxx and os.path.isfile(args.libcxx):
         shutil.copy2(args.libcxx, os.path.join(args.out_dir, "libc++_shared.so"))
         available_libs.append(args.libcxx)
