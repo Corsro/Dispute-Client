@@ -33,7 +33,7 @@ function renderHtml(data) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CorzClient ${escapeHtml(data.modMeta.version)} — Android ARM64 / Mojo Port</title>
+  <title>${escapeHtml(data.modMeta.name || 'Dispute Client')} ${escapeHtml(data.modMeta.version)} — Android ARM64 / Mojo Port</title>
   <style>
     :root {
       color-scheme: dark;
@@ -207,7 +207,7 @@ function renderHtml(data) {
 <body>
   <main>
     <header>
-      <h1>CorzClient ${escapeHtml(data.modMeta.version)} — Android ARM64 &amp; Mojo Launcher Port</h1>
+      <h1>${escapeHtml(data.modMeta.name || 'Dispute Client')} ${escapeHtml(data.modMeta.version)} — Android ARM64 &amp; Mojo Launcher Port</h1>
       <p class="subtitle">
         Full 1:1 Android ARM64 compatibility port preserving the native QVM runtime (<code>libvm.so</code>),
         all <code>gg.corz.*</code> modules and AI bots, Mixins, and Adreno GLES 3.0 shaders for Minecraft 1.21.11 (Fabric).
@@ -215,11 +215,11 @@ function renderHtml(data) {
       <div class="metrics">
         <div class="metric">
           <div class="metric-val">${data.uniqueModuleCount}</div>
-          <div class="metric-label">Preserved Modules &amp; Bots</div>
+          <div class="metric-label">Total Modules &amp; Bots</div>
         </div>
         <div class="metric">
-          <div class="metric-val">${data.totalClassMappings}</div>
-          <div class="metric-label">Mapped Obfuscated Classes</div>
+          <div class="metric-val">+${data.addedBotCount}</div>
+          <div class="metric-label">Added Clean 2.0.3 Bots</div>
         </div>
         <div class="metric">
           <div class="metric-val">${data.shaderCount}</div>
@@ -244,6 +244,10 @@ function renderHtml(data) {
           <p><code>CorzBytecodePatcher</code> keeps <code>&lt;invokedynamic&gt;</code> &amp; QVM calls intact while routing <code>FileDialog</code> and raw <code>GLFW</code> polls to Android-safe bridges.</p>
         </article>
         <article class="card">
+          <h3>5 Clean 2.0.3 Bots + Mojo Touch Hub</h3>
+          <p><code>CorzBotsAddon</code> adds <strong>SMP PvP</strong>, <strong>UHC PvP</strong>, <strong>Mace + SpearMace</strong>, <strong>Tree Farmer</strong>, &amp; <strong>Auto Ore Miner</strong> via offline <code>LocalCombat</code>/<code>LocalCompute</code> (<code>Pause &rarr; Dispute Bots</code> / <code>.dispute</code>), with all <code>net/fabric/*</code> malware stripped.</p>
+        </article>
+        <article class="card">
           <h3>Adreno 619 / LTW Shader Safety</h3>
           <p>All 75 shaders normalized to <code>#version 330</code> with clamped <code>texelFetch</code>, guarded <code>inversesqrt</code>/<code>pow</code>, explicit arrays, and integer loops.</p>
         </article>
@@ -254,8 +258,8 @@ function renderHtml(data) {
       <h2 id="build-heading">GitHub Actions Build Artifact</h2>
       <ol class="steps">
         <li>Sync repository changes to GitHub (keeping the 108.5 MB Git LFS <code>Corz-Client.zip</code> intact).</li>
-        <li>Open <strong>Actions → Build CorzClient Android (Mojo ARM64) Port</strong>.</li>
-        <li>Download the <strong>CorzClient-2.0.1-Android-Mojo</strong> artifact and place <code>CorzClient-2.0.1-Android-Mojo.jar</code> into Mojo Launcher's <code>mods/</code> folder.</li>
+        <li>Open <strong>Actions → Build Dispute Client Android (Mojo ARM64) Port</strong>.</li>
+        <li>Download the <strong>DisputeClient-2.0.1-Android-Mojo</strong> artifact and place <code>DisputeClient-2.0.1-Android-Mojo.jar</code> into Mojo Launcher's <code>mods/</code> folder.</li>
       </ol>
     </section>
 

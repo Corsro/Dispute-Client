@@ -107,6 +107,32 @@ public final class CorzBytecodePatcher {
                 MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
                 return new MethodVisitor(Opcodes.ASM9, mv) {
                     @Override
+                    public void visitLdcInsn(Object value) {
+                        if (value instanceof String) {
+                            String s = (String) value;
+                            if (!s.contains("assets/") && !s.contains("corzclient") && !s.startsWith("gg/corz/") && !s.startsWith("com/corz/")) {
+                                if (s.equals("Corz") || s.equals("CorzClient")) {
+                                    super.visitLdcInsn("Dispute");
+                                    return;
+                                }
+                                if (s.equals("CORZ") || s.equals("CORZ CLIENT")) {
+                                    super.visitLdcInsn("DISPUTE");
+                                    return;
+                                }
+                                if (s.contains("Corz Client")) {
+                                    super.visitLdcInsn(s.replace("Corz Client", "Dispute Client"));
+                                    return;
+                                }
+                                if (s.contains("corz.gg")) {
+                                    super.visitLdcInsn(s.replace("corz.gg", "dispute.gg"));
+                                    return;
+                                }
+                            }
+                        }
+                        super.visitLdcInsn(value);
+                    }
+
+                    @Override
                     public void visitMethodInsn(int opcode, String owner, String mName, String mDesc, boolean isInterface) {
                         if (GLFW_INTERNAL.equals(owner)) {
                             if ("glfwGetMouseButton".equals(mName) && "(JI)I".equals(mDesc)) {

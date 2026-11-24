@@ -1,4 +1,4 @@
-name: Build CorzClient Android (Mojo ARM64) Port
+name: Build Dispute Client Android (Mojo ARM64) Port
 
 on:
   push:
@@ -84,32 +84,37 @@ jobs:
             build/patched/corzclient-asm-patched.jar \
             build/reports/asm_patch_report.txt
 
-      - name: Compile Android compat classes, QVM Runtime, CorzClient, and Mixins
+      - name: Compile Android compat classes, QVM Runtime, CorzClient, Mixins, and Clean Bots
         run: |
           mkdir -p build/mod-classes build/compile-sources
           MC_CP="$(cat build/deps/compile_classpath.txt)"
-          FULL_CP="build/patched/corzclient-asm-patched.jar:$MC_CP"
+          FULL_CP="build/patched/corzclient-asm-patched.jar:libs/client-rpc-1.0.0-bundled.jar:$MC_CP"
 
-          printf '%s\n' \
-            source/com/corz/client/android/AndroidFilePicker.java \
-            source/com/corz/client/android/AndroidRuntimeEnv.java \
-            source/com/corz/client/android/CompatFileDialog.java \
-            source/com/corz/client/android/MojoBlurCoordinator.java \
-            source/com/corz/client/android/MojoInputBridge.java \
-            source/com/corz/client/qvm/Runtime.java \
-            source/com/corz/client/CorzClient.java \
-            source/com/corz/client/mixins/MixinWindow.java \
-            source/com/corz/client/mixins/MixinMouse.java \
-            source/com/corz/client/mixins/MixinKeyboard.java \
-            source/com/corz/client/mixins/MixinGameRenderer.java \
-            source/com/corz/client/mixins/MixinGameRendererMotionBlur.java \
-            source/com/corz/client/mixins/MixinHeldItemRenderer.java \
-            > build/compile-sources/sources.txt
-          echo "Compiling $(wc -l < build/compile-sources/sources.txt) modified/new Java files against intermediary MC 1.21.11 + upstream gg.corz..."
+          {
+            printf '%s\n' \
+              source/com/corz/client/android/AndroidFilePicker.java \
+              source/com/corz/client/android/AndroidRuntimeEnv.java \
+              source/com/corz/client/android/CompatFileDialog.java \
+              source/com/corz/client/android/MojoBlurCoordinator.java \
+              source/com/corz/client/android/MojoInputBridge.java \
+              source/com/corz/client/qvm/Runtime.java \
+              source/com/corz/client/CorzClient.java \
+              source/com/corz/client/LocalBranding.java \
+              source/com/corz/client/LocalCombat.java \
+              source/com/corz/client/LocalCompute.java \
+              source/com/corz/client/mixins/MixinWindow.java \
+              source/com/corz/client/mixins/MixinMouse.java \
+              source/com/corz/client/mixins/MixinKeyboard.java \
+              source/com/corz/client/mixins/MixinGameRenderer.java \
+              source/com/corz/client/mixins/MixinGameRendererMotionBlur.java \
+              source/com/corz/client/mixins/MixinHeldItemRenderer.java
+            find source/com/corz/client/bots source/corzbot source/de/neo/uhcbot -name '*.java' | sort
+          } > build/compile-sources/sources.txt
+          echo "Compiling $(wc -l < build/compile-sources/sources.txt) modified/new Java files against intermediary MC 1.21.11 + upstream gg.corz + client-rpc..."
 
           javac --release 21 -encoding UTF-8 -Xlint:none -cp "$FULL_CP" -d build/mod-classes @build/compile-sources/sources.txt
 
-      - name: Assemble & verify final CorzClient-2.0.1-Android-Mojo JAR
+      - name: Assemble & verify final DisputeClient-2.0.1-Android-Mojo JAR
         run: |
           LLVM_READELF="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf"
           python3 tools/overlay_and_verify_jar.py \
@@ -117,20 +122,24 @@ jobs:
             --compiled-classes build/mod-classes \
             --android-native-dir build/android-native \
             --shaders-dir source/assets/corzclient/shaders \
-            --output-jar build/dist/CorzClient-2.0.1-Android-Mojo.jar \
+            --rpc-jar libs/client-rpc-1.0.0-bundled.jar \
+            --mixin-configs source/corzbot.mixins.json source/corzbots-addon.mixins.json \
+            --output-jar build/dist/DisputeClient-2.0.1-Android-Mojo.jar \
             --report build/reports/jar_verification_report.txt \
             --readelf "$LLVM_READELF"
 
-          # Also create an install-ready bundle if Corz-Client.zip had companion mods/bootstrap
-          cp build/dist/CorzClient-2.0.1-Android-Mojo.jar "$UPSTREAM_MOD_JAR"
+          # Keep companion and compatibility symlinks
+          cp build/dist/DisputeClient-2.0.1-Android-Mojo.jar build/dist/CorzClient-2.0.1-Android-Mojo.jar
+          cp build/dist/DisputeClient-2.0.1-Android-Mojo.jar "$UPSTREAM_MOD_JAR"
           if [ -n "$(find build/upstream/unpacked -maxdepth 3 -type f 2>/dev/null)" ]; then
-            (cd build/upstream/unpacked && zip -r ../../dist/CorzClient-2.0.1-Android-Mojo-Bundle.zip .)
+            (cd build/upstream/unpacked && zip -r ../../dist/DisputeClient-2.0.1-Android-Mojo-Bundle.zip .)
+            cp build/dist/DisputeClient-2.0.1-Android-Mojo-Bundle.zip build/dist/CorzClient-2.0.1-Android-Mojo-Bundle.zip || true
           fi
 
       - name: Upload built JAR & verification reports
         uses: actions/upload-artifact@v4
         with:
-          name: CorzClient-2.0.1-Android-Mojo
+          name: DisputeClient-2.0.1-Android-Mojo
           path: |
             build/dist/*.jar
             build/dist/*.zip
