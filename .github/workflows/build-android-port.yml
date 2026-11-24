@@ -48,11 +48,11 @@ jobs:
             echo "=== Upstream linux-aarch64/libvm.so file ==="
             file "$UPSTREAM_LINUX_ARM64_VM"
             echo "=== Dynamic tags (readelf -d) ==="
-            readelf -d "$UPSTREAM_LINUX_ARM64_VM"
+            readelf -d "$UPSTREAM_LINUX_ARM64_VM" || true
             echo "=== JNI / exported symbols ==="
-            nm -D --defined-only "$UPSTREAM_LINUX_ARM64_VM" | grep -E "JNI_OnLoad|Java_com_corz_client_qvm_Runtime" || true
+            nm -D --defined-only "$UPSTREAM_LINUX_ARM64_VM" 2>/dev/null | grep -E "JNI_OnLoad|Java_com_corz_client_qvm_Runtime" || true
             echo "=== Undefined symbols count ==="
-            nm -Du "$UPSTREAM_LINUX_ARM64_VM" | wc -l
+            (nm -Du "$UPSTREAM_LINUX_ARM64_VM" 2>/dev/null | wc -l) || true
           } > build/reports/libvm_elf_report.txt
           cat build/reports/libvm_elf_report.txt
 
@@ -90,21 +90,21 @@ jobs:
           MC_CP="$(cat build/deps/compile_classpath.txt)"
           FULL_CP="build/patched/corzclient-asm-patched.jar:$MC_CP"
 
-          cat <<'EOF' > build/compile-sources/sources.txt
-source/com/corz/client/android/AndroidFilePicker.java
-source/com/corz/client/android/AndroidRuntimeEnv.java
-source/com/corz/client/android/CompatFileDialog.java
-source/com/corz/client/android/MojoBlurCoordinator.java
-source/com/corz/client/android/MojoInputBridge.java
-source/com/corz/client/qvm/Runtime.java
-source/com/corz/client/CorzClient.java
-source/com/corz/client/mixins/MixinWindow.java
-source/com/corz/client/mixins/MixinMouse.java
-source/com/corz/client/mixins/MixinKeyboard.java
-source/com/corz/client/mixins/MixinGameRenderer.java
-source/com/corz/client/mixins/MixinGameRendererMotionBlur.java
-source/com/corz/client/mixins/MixinHeldItemRenderer.java
-EOF
+          printf '%s\n' \
+            source/com/corz/client/android/AndroidFilePicker.java \
+            source/com/corz/client/android/AndroidRuntimeEnv.java \
+            source/com/corz/client/android/CompatFileDialog.java \
+            source/com/corz/client/android/MojoBlurCoordinator.java \
+            source/com/corz/client/android/MojoInputBridge.java \
+            source/com/corz/client/qvm/Runtime.java \
+            source/com/corz/client/CorzClient.java \
+            source/com/corz/client/mixins/MixinWindow.java \
+            source/com/corz/client/mixins/MixinMouse.java \
+            source/com/corz/client/mixins/MixinKeyboard.java \
+            source/com/corz/client/mixins/MixinGameRenderer.java \
+            source/com/corz/client/mixins/MixinGameRendererMotionBlur.java \
+            source/com/corz/client/mixins/MixinHeldItemRenderer.java \
+            > build/compile-sources/sources.txt
           echo "Compiling $(wc -l < build/compile-sources/sources.txt) modified/new Java files against intermediary MC 1.21.11 + upstream gg.corz..."
 
           javac --release 21 -encoding UTF-8 -Xlint:none -cp "$FULL_CP" -d build/mod-classes @build/compile-sources/sources.txt
