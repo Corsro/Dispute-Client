@@ -302,7 +302,20 @@ char *secure_getenv(const char *name) {
 }
 
 int __xpg_strerror_r(int errnum, char *buf, size_t buflen) {
-    return strerror_r(errnum, buf, buflen);
+    if (buflen == 0) return 22;
+    union {
+        char *pc;
+        int i;
+    } u;
+    u.pc = (char *)strerror_r(errnum, buf, buflen);
+    if ((uintptr_t)u.pc < 4096) {
+        return u.i;
+    } else {
+        if (u.pc && u.pc != buf) {
+            snprintf(buf, buflen, "%s", u.pc);
+        }
+        return 0;
+    }
 }
 
 const char *gnu_get_libc_version(void) {
